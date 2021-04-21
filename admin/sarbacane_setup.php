@@ -30,7 +30,7 @@ if (! $res) {
 // Libraries
 require_once DOL_DOCUMENT_ROOT . '/core/lib/admin.lib.php';
 require_once '../lib/sarbacane.lib.php';
-dol_include_once('abricot/includes/lib/admin.lib.php');
+
 
 // Translations
 $langs->loadLangs(array('sarbacane@sarbacane', 'admin', 'other'));
@@ -83,7 +83,7 @@ llxHeader('', $langs->trans($page_name));
 // Subheader
 $linkback = '<a href="' . DOL_URL_ROOT . '/admin/modules.php">'
     . $langs->trans("BackToModuleList") . '</a>';
-print load_fiche_titre($langs->trans($page_name), $linkback);
+print load_fiche_titre($langs->trans($page_name), $linkback, 'sarbacane@sarbacane');
 
 // Configuration header
 $head = sarbacaneAdminPrepareHead();
@@ -101,28 +101,12 @@ $var=false;
 print '<table class="noborder" width="100%">';
 
 
-if(!function_exists('setup_print_title')){
-    print '<div class="error" >'.$langs->trans('AbricotNeedUpdate').' : <a href="http://wiki.atm-consulting.fr/index.php/Accueil#Abricot" target="_blank"><i class="fa fa-info"></i> Wiki</a></div>';
-    exit;
-}
-
-setup_print_title("Parameters");
-
-// Example with a yes / no select
-setup_print_on_off('CONSTNAME', $langs->trans('ParamLabel'), 'ParamDesc');
-
-// Example with imput
-setup_print_input_form_part('CONSTNAME', $langs->trans('ParamLabel'));
-
-// Example with color
-setup_print_input_form_part('CONSTNAME', $langs->trans('ParamLabel'), 'ParamDesc', array('type'=>'color'), 'input', 'ParamHelp');
 
 // Example with placeholder
-//setup_print_input_form_part('CONSTNAME',$langs->trans('ParamLabel'),'ParamDesc',array('placeholder'=>'http://'),'input','ParamHelp');
+_print_input_form_part('SARBACANE_API_KEY',$langs->trans('SARBACANE_API_KEY'),'',array('placeholder'=>'API KEY', 'type' => 'password'),'input','SARBACANE_API_KEYHelp');
 
 // Example with textarea
 //setup_print_input_form_part('CONSTNAME',$langs->trans('ParamLabel'),'ParamDesc',array(),'textarea');
-
 
 print '</table>';
 
@@ -131,3 +115,60 @@ dol_fiche_end(-1);
 llxFooter();
 
 $db->close();
+
+function _print_input_form_part($confkey, $title = false, $desc ='', $metas = array(), $type='input', $help = false)
+{
+    global $var, $bc, $langs, $conf, $db;
+    $var=!$var;
+
+    $form=new Form($db);
+
+    $defaultMetas = array(
+        'name' => $confkey
+    );
+
+    if($type!='textarea'){
+        $defaultMetas['type']   = 'text';
+        $defaultMetas['value']  = $conf->global->{$confkey};
+    }
+
+
+    $metas = array_merge ($defaultMetas, $metas);
+    $metascompil = '';
+    foreach ($metas as $key => $values)
+    {
+        $metascompil .= ' '.$key.'="'.$values.'" ';
+    }
+
+    print '<tr '.$bc[$var].'>';
+    print '<td>';
+
+    if(!empty($help)){
+        print $form->textwithtooltip( ($title?$title:$langs->trans($confkey)) , $langs->trans($help),2,1,img_help(1,''));
+    }
+    else {
+        print $title?$title:$langs->trans($confkey);
+    }
+
+    if(!empty($desc))
+    {
+        print '<br><small>'.$langs->trans($desc).'</small>';
+    }
+
+    print '</td>';
+    print '<td align="center" width="20">&nbsp;</td>';
+    print '<td align="right" width="300" nowrap="nowrap">';
+    print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
+    print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+    print '<input type="hidden" name="action" value="set_'.$confkey.'">';
+    if($type=='textarea'){
+        print '<textarea '.$metascompil.'  >'.dol_htmlentities($conf->global->{$confkey}).'</textarea>';
+    }
+    else {
+        print '<input '.$metascompil.'  />';
+    }
+
+    print '<input type="submit" class="butAction" value="'.$langs->trans("Modify").'">';
+    print '</form>';
+    print '</td></tr>';
+}
