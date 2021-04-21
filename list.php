@@ -20,7 +20,7 @@ dol_include_once('sarbacane/class/sarbacane.class.php');
 
 if(empty($user->rights->sarbacane->read)) accessforbidden();
 
-$langs->load('abricot@abricot');
+
 $langs->load('sarbacane@sarbacane');
 
 

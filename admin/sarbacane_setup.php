@@ -104,6 +104,7 @@ print '<table class="noborder" width="100%">';
 
 // Example with placeholder
 _print_input_form_part('SARBACANE_API_KEY',$langs->trans('SARBACANE_API_KEY'),'',array('placeholder'=>'API KEY', 'type' => 'password'),'input','SARBACANE_API_KEYHelp');
+_print_input_form_part('SARBACANE_ACCOUNT_KEY',$langs->trans('SARBACANE_ACCOUNT_KEY'),'',array('placeholder'=>'ACCOUNT KEY', 'type' => 'password'),'input','SARBACANE_ACCOUNT_KEY_help');
 
 // Example with textarea
 //setup_print_input_form_part('CONSTNAME',$langs->trans('ParamLabel'),'ParamDesc',array(),'textarea');

@@ -99,7 +99,9 @@ class modsarbacane extends DolibarrModules
 
 		// Dependencies
 		$this->hidden = false;			// A condition to hide module
-		$this->depends = array();		// List of modules id that must be enabled if this module is enabled
+		$this->depends =  array(
+				"modMailing"
+		);;		// List of modules id that must be enabled if this module is enabled
 		$this->requiredby = array();	// List of modules id to disable if this one is disabled
 		$this->conflictwith = array();	// List of modules id this module is in conflict with
 		$this->phpmin = array(5,0);					// Minimum version of PHP required by module
@@ -137,7 +139,8 @@ class modsarbacane extends DolibarrModules
 		// 'stock'            to add a tab in stock view
 		// 'thirdparty'       to add a tab in third party view
 		// 'user'             to add a tab in user view
-        $this->tabs = array();
+        $this->tabs = array(
+                'emailing:+tabSarbacaneSending:SarbacaneSending:sarbacane@sarbacane:$user->rights->mailing->creer:/sarbacane/sarbacane.php?id=__ID__');
 
         // Dictionaries
 	    if (! isset($conf->sarbacane->enabled))
@@ -339,11 +342,9 @@ class modsarbacane extends DolibarrModules
 
 		define('INC_FROM_DOLIBARR', true);
 
-		require dol_buildpath('/sarbacane/script/create-maj-base.php');
 
 		$result=$this->_load_tables('/sarbacane/sql/');
 
-		setEventMessage('sarbacaneNewRightsDefinedCheckUserRights', 'warnings');
 
 		return $this->_init($sql, $options);
 	}
