@@ -242,72 +242,63 @@ class modsarbacane extends DolibarrModules
 		//							'user'=>0);				                // 0=Menu for internal users, 1=external users, 2=both
 		// $r++;
 
-/*
-		$this->menu[$r]=array(
-			'fk_menu'=>0,			                // Put 0 if this is a top menu
-			'type'=>'top',			                // This is a Top menu entry
-			'titre'=>$langs->trans('TopMenusarbacane'),
-			'mainmenu'=>'sarbacane',
-			'leftmenu'=>'',
-			'url'=>'/sarbacane/list.php',
-			'langs'=>'sarbacane@sarbacane',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-			'position'=>100+$r,
-			'enabled'=>'$conf->sarbacane->enabled',	// Define condition to show or hide menu entry. Use '$conf->missionorder->enabled' if entry must be visible if module is enabled.
-			'perms'=>'$user->rights->sarbacane->read',			                // Use 'perms'=>'$user->rights->missionorder->level1->level2' if you want your menu with a permission rules
-			'target'=>'',
-			'user'=>0
+    $this->menu[$r] = array(
+				'fk_menu' => 0,
+				'type' => 'top',
+				'titre' => 'Module104305Name',
+				'mainmenu' => 'sarbacane',
+				'leftmenu' => '1',
+				'url' => '/sarbacane/list.php',
+				'langs' => 'sarbacane@sarbacane',
+				'position' => 100,
+				'enabled' => '1',
+				'perms' => '$user->rights->mailing->lire',
+				'target' => '',
+				'user' => 2
 		);
-		$r++;
-
-		$this->menu[$r]=array(
-			'fk_menu'=>'fk_mainmenu=sarbacane',			                // Put 0 if this is a top menu
-			'type'=>'left',			                // This is a Top menu entry
-			'titre'=>$langs->trans('TopMenusarbacane'),
-			'mainmenu'=>'sarbacane',
-			'leftmenu'=>'sarbacane_left',
-			'url'=>'/sarbacane/list.php',
-			'langs'=>'sarbacane@sarbacane',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-			'position'=>100+$r,
-			'enabled'=>'$conf->sarbacane->enabled',	// Define condition to show or hide menu entry. Use '$conf->missionorder->enabled' if entry must be visible if module is enabled.
-			'perms'=>'$user->rights->sarbacane->read',			                // Use 'perms'=>'$user->rights->missionorder->level1->level2' if you want your menu with a permission rules
-			'target'=>'',
-			'user'=>0
+		$r ++;
+		$this->menu[$r] = array(
+				'fk_menu' => 'fk_mainmenu=sarbacane',
+				'type' => 'left',
+				'titre' => 'Module104305Name',
+				'leftmenu' => 'SarbacaneMenu',
+				'url' => '/sarbacane/list.php',
+				'langs' => 'sarbacane@sarbacane',
+				'position' => 100,
+				'enabled' => '$user->rights->mailing->lire',
+				'perms' => '$user->rights->mailing->lire',
+				'target' => '',
+				'user' => 2
 		);
-		$r++;
+		$r ++;
 
-		$this->menu[$r]=array(
-			'fk_menu'=>'fk_mainmenu=sarbacane,fk_leftmenu=sarbacane_left',		    // Use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-			'type'=>'left',			                // This is a Left menu entry
-			'titre'=>$langs->trans('LeftMenusarbacaneCreate'),
-			'mainmenu'=>'sarbacane',
-			'leftmenu'=>'sarbacane_left_create',
-			'url'=>'/sarbacane/card.php?action=create',
-			'langs'=>'sarbacane@sarbacane',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-			'position'=>100+$r,
-			'enabled'=> '$conf->sarbacane->enabled',  // Define condition to show or hide menu entry. Use '$conf->missionorder->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'perms'=> '$user->rights->sarbacane->write',			                // Use 'perms'=>'$user->rights->missionorder->level1->level2' if you want your menu with a permission rules
-			'target'=>'',
-			'user'=>0
-		);				                // 0=Menu for internal users, 1=external users, 2=both
-		$r++;
+		$this->menu[$r] = array(
+				'fk_menu' => 'fk_mainmenu=sarbacane,fk_leftmenu=SarbacaneMenu',
+				'type' => 'left',
+				'titre' => 'SarbacaneDestList',
+				'url' => '/sarbacane/list.php',
+				'langs' => 'sarbacane@sarbacane',
+				'position' => 101,
+				'enabled' => '$user->rights->mailing->lire',
+				'perms' => '$user->rights->mailing->lire',
+				'target' => '',
+				'user' => 2
+		);
+		$r ++;
 
-
-		$this->menu[$r]=array(
-			'fk_menu'=>'fk_mainmenu=sarbacane,fk_leftmenu=sarbacane_left',		    // Use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-			'type'=>'left',			                // This is a Left menu entry
-			'titre'=>$langs->trans('LeftMenusarbacaneList'),
-			'mainmenu'=>'sarbacane',
-			'leftmenu'=>'sarbacane_left_list',
-			'url'=>'/sarbacane/list.php',
-			'langs'=>'sarbacane@sarbacane',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-			'position'=>100+$r,
-			'enabled'=> '$conf->sarbacane->enabled',  // Define condition to show or hide menu entry. Use '$conf->missionorder->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'perms'=> '$user->rights->sarbacane->write',			                // Use 'perms'=>'$user->rights->missionorder->level1->level2' if you want your menu with a permission rules
-			'target'=>'',
-			'user'=>0
-		);				                // 0=Menu for internal users, 1=external users, 2=both
-		$r++;
-*/
+		$this->menu[$r] = array(
+				'fk_menu' => 'fk_mainmenu=sarbacane,fk_leftmenu=SarbacaneMenu',
+				'type' => 'left',
+				'titre' => 'NewMailing',
+				'url' =>'/comm/mailing/card.php?leftmenu=mailing&action=create',
+				'langs' => 'mails',
+				'position' => 105,
+				'enabled' => '$user->rights->mailing->creer',
+				'perms' => '$user->rights->mailing->creer',
+				'target' => '',
+				'user' => 2
+		);
+		$r ++;
 
 		// Exports
 		$r=1;

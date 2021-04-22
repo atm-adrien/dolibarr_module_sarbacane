@@ -1213,7 +1213,20 @@ class DolSarbacane extends CommonObject {
         $result = $object->fetch($this->fk_mailing);
 
         $result = '<a href="'.dol_buildpath('/sarbacane/sarbacane.php', 1).'?id='.$object->id.'">';
+        $result .= '<span class="fas fa-at paddingright classfortooltip" style=""></span>';
         $result .= $object->titre;
+        $result .= '</a>';
+
+        return $result;
+    }
+    function getExternalNomUrl() {
+        require_once DOL_DOCUMENT_ROOT.'/comm/mailing/class/mailing.class.php';
+        $object = new Mailing($this->db);
+        $result = $object->fetch($this->fk_mailing);
+
+        $result = '<a href="https://app.sarbacane.com/#!/p/campaignslist/camp/'.$this->sarbacane_id.'/preview">';
+        $result .= img_picto('', 'object_sarbacane@sarbacane', 'style="position:relative;top:2px;"');
+        $result .= '&nbsp;'.$object->titre;
         $result .= '</a>';
 
         return $result;
