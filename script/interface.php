@@ -36,8 +36,8 @@ $set=GETPOST('set', 'none');
 if (empty($listid)) $listid = GETPOST('listid', 'none');
 if (empty($fk_mailing)) $fk_mailing = (int)GETPOST('fk_mailing', 'int');
 
-if (empty($listid)) return __out('listid param missing');
-if (empty($fk_mailing)) return __out('fk_mailing param missing');
+if (empty($listid)) return _out('listid param missing');
+if (empty($fk_mailing)) return _out('fk_mailing param missing');
 
 $sarbacane= new DolSarbacane($db);
 $sarbacane->fetch_by_mailing($fk_mailing);
@@ -50,14 +50,14 @@ if (empty($sarbacane->id))
 {
 	$result=$sarbacane->create($user);
 	if ($result<0) {
-		return __out($sarbacane->error);
+		return _out($sarbacane->error);
 	}
 }
 else
 {
 	$result=$sarbacane->update($user);
 	if ($result<0) {
-		return __out($sarbacane->error);
+		return _out($sarbacane->error);
 	}
 }
 
@@ -72,7 +72,7 @@ switch ($get) {
 				// Si j'ai au moin 1 pid en cours je renvoi l'info qu'il ne faut pas reload la page
 				if (file_exists('/proc/'.$pid))
 				{
-					__out(false);
+					_out(false);
 					exit;
 				}
 
@@ -80,7 +80,7 @@ switch ($get) {
 			}
 		}
 
-		__out(true);
+		_out(true);
 		exit;
 
 		break;
@@ -94,7 +94,7 @@ switch ($set) {
 		$pid = exec('php '.$script.' '.$params.' > /dev/null 2>&1 & echo $!;');
 		$_SESSION['SARBACANE_PID_ACTIVE'][$fk_mailing][$listid][$pid] = $pid;
 
-		__out($pid);
+		_out($pid);
 		exit;
 
 		break;
@@ -105,7 +105,7 @@ switch ($set) {
 		$pid = exec('php '.$script.' '.$params.' > /dev/null 2>&1 & echo $!;');
 		$_SESSION['SARBACANE_PID_ACTIVE'][$fk_mailing][$listid][$pid] = $pid;
 
-		__out($pid);
+		_out($pid);
 		exit;
 
 		break;
@@ -122,7 +122,7 @@ switch ($async_action) {
 		break;
 }
 
-function __out($data, $type='', $callback='') {
+function _out($data, $type='', $callback='') {
 
 	if(empty($type)) {
 		if(isset($_REQUEST['gz'])) $type = 'gz';

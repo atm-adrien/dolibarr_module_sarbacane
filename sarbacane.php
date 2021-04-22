@@ -120,6 +120,52 @@ if ($action == 'settitre' || $action == 'setemail_from') {
 	$action="";
 }
 
+if ($action == 'createsarbacanecampaign') {
+
+	$sarbacane->currentmailing=$object;
+
+	$result=$sarbacane->createSarbacaneCampaign($user);
+	if ($result<0) {
+
+		setEventMessage($sarbacane->error,'errors');
+	}
+}
+
+if ($action=='sendsarbacanecampaign') {
+	//Send campaign
+	$result=$sarbacane->sendSarbacaneCampaign();
+	if ($result<0) {
+		setEventMessage($sarbacane->error,'errors');
+	} else {
+		//Update mailing general status
+		$object->statut=3;
+		$sql="UPDATE ".MAIN_DB_PREFIX."mailing SET statut=".$object->statut." WHERE rowid=".$object->id;
+		dol_syslog("sarbacane/sarbacane.php: update global status sql=".$sql, LOG_DEBUG);
+		$resql2=$db->query($sql);
+		if (! $resql2)	{
+			setEventMessage($db->lasterror(),'errors');
+		} else setEventMessage($langs->trans('Sent'));
+	}
+}
+
+if ($action=='setsarbacane_sender_name') {
+	$sarbacane->sarbacane_sender_name  = GETPOST('sarbacane_sender_name','alpha');
+	if (empty($sarbacane->id)) {
+		$sarbacane->fk_mailing=$id;
+		$result=$sarbacane->create($user);
+	}else {
+		$result=$sarbacane->update($user);
+	}
+	if ($result<0) {
+		setEventMessage($sarbacane->error,'errors');
+	}else {
+		$result=$sarbacane->fetch_by_mailing($id);
+		if ($result<0) {
+			setEventMessage($sarbacane->error,'errors');
+		}
+	}
+}
+
 if ($action=='associateconfirm') {
 
 	$import=GETPOST('import','alpha');
@@ -170,7 +216,11 @@ if (empty($sarbacane->sarbacane_listid)) {
 	$error_sarbacane_control++;
 }
 
-
+$error_sendername=false;
+if (empty($sarbacane->sarbacane_sender_name)) {
+	$error_sendername=true;
+	$error_sarbacane_control++;
+}
 
 
 $warning_destnotsync=false;
@@ -327,11 +377,11 @@ if ( !empty($conf->global->SARBACANE_API_KEY)) {
 	}
 
 	// Sarbacane Sender Name
-//	print '<tr class="pair"><td>';
-//	print $form->editfieldkey("SarbacaneSenderName",'sarbacane_sender_name',$sarbacane->sarbacane_sender_name,$objecttoedit,$user->rights->mailing->creer && $object->statut < 3 && empty($sarbacane->sarbacane_id),'string');
-//	print '</td><td colspan="3">';
-//	print $form->editfieldval("SarbacaneSenderName",'sarbacane_sender_name',$sarbacane->sarbacane_sender_name,$objecttoedit,$user->rights->mailing->creer && $object->statut < 3 && empty($sarbacane->sarbacane_id),'string');
-//	print '</td></tr>';
+	print '<tr class="pair"><td>';
+	print $form->editfieldkey("SarbacaneSenderName",'sarbacane_sender_name',$sarbacane->sarbacane_sender_name,$objecttoedit,$user->rights->mailing->creer && $object->statut < 3 && empty($sarbacane->sarbacane_id),'string');
+	print '</td><td colspan="3">';
+	print $form->editfieldval("SarbacaneSenderName",'sarbacane_sender_name',$sarbacane->sarbacane_sender_name,$objecttoedit,$user->rights->mailing->creer && $object->statut < 3 && empty($sarbacane->sarbacane_id),'string');
+	print '</td></tr>';
 
 
 	if (!empty($sarbacane->sarbacane_id)) {
@@ -349,7 +399,7 @@ if ( !empty($conf->global->SARBACANE_API_KEY)) {
 		print '<tr class="pair"><td>';
 		print $langs->trans("SarbacaneCampaign");
 		print '</td><td colspan="3">';
-		print '<a target="_blanck" href="https://my.sarbacane.com/camp/listing#draft_c">'.$langs->trans('SarbacaneCampaign').'</a>';
+		print '<a target="_blanck" href="https://app.sarbacane.com/#!/p/campaignslist/camp/'.$sarbacane->sarbacane_id.'/preview">'.$langs->trans('SarbacaneCampaign').'</a>';
 		print '</td></tr>';
 
 		//List campaign sarbacane
@@ -357,14 +407,16 @@ if ( !empty($conf->global->SARBACANE_API_KEY)) {
 		print $langs->trans("SarbacaneDestList");
 		print '</td><td colspan="3">';
 		if (!empty($sarbacane->sarbacane_listid)) {
-			$result=$sarbacane->getListDestinaries(array('id'=>$sarbacane->sarbacane_listid));
+			$result=$sarbacane->getListDestinaries();
 			if ($result<0) {
 				setEventMessage($sarbacane->error,'errors');
 			}
 			if (is_array($sarbacane->listdest_lines) && count($sarbacane->listdest_lines)>0) {
 
+                foreach($sarbacane->listdest_lines as $list) {
+                    if($sarbacane->sarbacane_listid == $list['id']) print '<a target="_blanck" href="https://app.sarbacane.com/#!/p/contacts/list/'.$list['id'].'">'.$list['name'].'</a>';
+                }
 
-				print $sarbacane->listdest_lines['data']['name'];
 
 			}
 		}
@@ -468,6 +520,9 @@ if ( !empty($conf->global->SARBACANE_API_KEY)) {
 			dol_htmloutput_mesg($langs->trans("SarbacaneEmailNotSyncInDolNotSarbacane").'<br>'.implode('<br>',$email_in_dol_not_in_sarbacane),'','warning',1);
 		}
 	}
+    if($error_sendername) {
+        dol_htmloutput_mesg($langs->trans("SarbacaneSenderNameMandatory"), '', 'error', 1);
+    }
 	if ($object->statut == 0) {
 		if ((float) DOL_VERSION < 3.7) dol_htmloutput_mesg($langs->trans("SarbacaneNotValidated").' : <a href="'.dol_buildpath('/comm/mailing/fiche.php',1).'?id='.$object->id.'">'.$langs->trans('Mailing').'</a>','','warning',1);
 		else  dol_htmloutput_mesg($langs->trans("SarbacaneNotValidated").' : <a href="'.dol_buildpath('/comm/mailing/card.php',1).'?id='.$object->id.'">'.$langs->trans('Mailing').'</a>','','warning',1);
@@ -534,38 +589,7 @@ if ( !empty($conf->global->SARBACANE_API_KEY)) {
 }else {
 	dol_htmloutput_mesg($langs->trans("InvalidAPIKey"),'','error',1);
 }
-if($object->statut == 3){
-		$PDOdb = new TPDOdb;
-		$listeview = new TListviewTBS('graphCampaignActions');
-		$TSum[] = array($langs->transnoentities('unique_views'),$sarbacane->sarbacane_webid['data'][0]['unique_views']);
-		$TSum[] = array($langs->transnoentities('viewed'),$sarbacane->sarbacane_webid['data'][0]['viewed']);
-		$TSum[] = array($langs->transnoentities('clicked'),$sarbacane->sarbacane_webid['data'][0]['clicked']);
-		$TSum[] = array($langs->transnoentities('Hard Bounce'),$sarbacane->sarbacane_webid['data'][0]['hard_bounce']);
-		$TSum[] = array($langs->transnoentities('Soft Bounce'),$sarbacane->sarbacane_webid['data'][0]['soft_bounce']);
-		$TSum[] = array($langs->transnoentities('unsub'),$sarbacane->sarbacane_webid['data'][0]['unsub']);
-		$TSum[] = array($langs->transnoentities('mirror_click'),$sarbacane->sarbacane_webid['data'][0]['mirror_click']);
-		$TSum[] = array($langs->transnoentities('complaints'),$sarbacane->sarbacane_webid['data'][0]['complaints']);
 
-		if(!empty($sarbacane->sarbacane_webid['data'][0]['delivered'])){
-			print $listeview->renderArray($PDOdb, $TSum
-			,array(
-			'type' => 'chart'
-			,'chartType' => 'PieChart'
-			,'liste'=>array(
-			'titre'=>$langs->transnoentitiesnoconv('titleGraphCampaignActions')
-			)
-			)
-			);
-		}
-
-}
-
-//unset($_SESSION['SARBACANE_PID_ACTIVE']);
-//$_SESSION['SARBACANE_PID_ACTIVE'][$object->id][$sarbacane->sarbacane_listid][] = 158;
-//$_SESSION['SARBACANE_PID_ACTIVE'][$object->id][$sarbacane->sarbacane_listid][] = 159;
-
-//var_dump($_SESSION['SARBACANE_PID_ACTIVE']);
-//exit;
 ?>
 <script type="text/javascript">
 	sarbacaneTimer = null;

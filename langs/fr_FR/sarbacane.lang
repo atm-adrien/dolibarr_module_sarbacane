@@ -109,3 +109,5 @@ SarbacaneConfirmUpdateCampaignText=Cette opération peux être très longue et p
 SarbacaneConfirmUpdateCampaign=Confirmer la mise à jour des statuts des destinataires Dolibarr depuis Sarbacane pour la campagnes
 SarbacaneReturnError=Sarbacane a renvoyé l'erreur suivante : %s
 SarbacaneListCreated=Liste créée avec succès
+SarbacaneCampaign = Campagne Sarbacane
+Sent=Envoyée

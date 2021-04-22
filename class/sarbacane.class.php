@@ -51,14 +51,17 @@ class Sarbacane extends CommonObject {
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_TIMEOUT_MS, $timeout);
         curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLOPT_POST, count($input));
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($input));
+        if(!empty($input)) {
+            curl_setopt($ch, CURLOPT_POST, count($input));
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($input));
+        }
         $data = curl_exec($ch);
+        $info = curl_getinfo($ch);
         if(curl_errno($ch)) {
             throw new RuntimeException('cURL error: '.curl_error($ch));
         }
-        if(! is_string($data) || ! strlen($data)) {
-            throw new RuntimeException('Request Failed');
+        if($info['http_code'] > 400) {
+            throw new RuntimeException($data);
         }
         curl_close($ch);
         return json_decode($data, true);

@@ -550,25 +550,12 @@ class DolSarbacane extends CommonObject {
     }
 
     /**
-     * Retreive Sarbacane Contact List
+     * Retreive Sarbacane Contact Lists
      *
-     * @param array  $filters    a hash of filters to apply to this query - all are optional:
-     *                           string list_id optional - return a single list using a known list_id. Accepts multiples separated by commas when not using exact matching
-     *                           string list_name optional - only lists that match this name
-     *                           string from_name optional - only lists that have a default from name matching this
-     *                           string from_email optional - only lists that have a default from email matching this
-     *                           string from_subject optional - only lists that have a default from email matching this
-     *                           string created_before optional - only show lists that were created before this date/time (in GMT) - format is YYYY-MM-DD HH:mm:ss (24hr)
-     *                           string created_after optional - only show lists that were created since this date/time (in GMT) - format is YYYY-MM-DD HH:mm:ss (24hr)
-     *                           boolean exact optional - flag for whether to filter on exact values when filtering, or search within content for filter values - defaults to true
-     * @param int    $start      optional - control paging of lists, start results at this list #, defaults to 1st page of data (page 0)
-     * @param int    $limit      optional - control paging of lists, number of lists to return with each call, defaults to 25 (max=100)
-     * @param string $sort_field optional - "created" (the created date, default) or "web" (the display order in the web app). Invalid values will fall back on "created" - case insensitive.
-     * @param string $sort_dir   optional - "DESC" for descending (default), "ASC" for Ascending. Invalid values will fall back on "created" - case insensitive. Note: to get the exact display order as the web app you'd use "web" and "ASC"
-     *
+     * @param array  $filters
      * @return int <0 if KO, >0 if OK
      */
-    function getListDestinaries($filters = array(), $start = 0, $limit = 100, $sort_field = 'created', $sort_dir = 'DESC') {
+    function getListDestinaries($filters = array()) {
         $error = 0;
 
         $result = $this->getInstanceSarbacane();
@@ -775,6 +762,53 @@ class DolSarbacane extends CommonObject {
             foreach($TMail as &$email) $email = strtolower($email);
         }
     }
+    
+    function createSarbacaneCampaign($user) {
+		$result = $this->getInstanceSarbacane();
+		if ($result < 0) {
+			dol_syslog(get_class($this) . "::createSarbacaneCampaign " . $this->error, LOG_ERR);
+			return - 1;
+		}
+		$data =array(
+				"aliasFrom" =>$this->sarbacane_sender_name,
+				"aliasReplyTo" =>$this->sarbacane_sender_name,
+				 "name" => $this->currentmailing->titre,
+				 "listid"=>array($this->sarbacane_listid),
+				 "subject"=>$this->currentmailing->sujet,
+				 "emailFrom"=>$this->currentmailing->email_from,
+				 "emailReplyTo"=>$this->currentmailing->email_from);
+
+		if (empty($this->sarbacane_id)) {
+			try {
+
+				$response = $this->sarbacane->post('campaigns/email',$data);
+                if(empty($response['id'])){
+
+                    $this->error = $response['message'];
+                    return -1;
+                }
+                $this->sarbacane_id = $response['id'];
+                $this->sarbacane_webid = $this->sarbacane_id;
+                $this->sarbacane->post('/campaigns/'.$this->sarbacane_id.'/list',array("listId"=>$this->sarbacane_listid));
+                $response = $this->sarbacane->get('/campaigns/'.$this->sarbacane_id,array());
+                $sendId = $response['campaign']['sends'][0];
+                $this->sarbacane->post('/campaigns/'.$this->sarbacane_id.'/send/'.$sendId.'/content',array("html"=>$this->currentmailing->body));
+			} catch ( Exception $e ) {
+				$this->error = $e->getMessage();
+				exit;
+				dol_syslog(get_class($this) . "::createSarbacaneCampaign " . $this->error, LOG_ERR);
+				return - 1;
+			}
+
+
+			$result = $this->update($user);
+			if ($result < 0) {
+				return - 1;
+			}
+		}
+
+		return 1;
+	}
 
     function createList($namelist) {
         if(empty($this->sarbacane)) {
@@ -843,29 +877,29 @@ class DolSarbacane extends CommonObject {
      * @return string status
      */
     function getSarbacaneCampaignStatus($mode = 1) {
-        $result = $this->getInstanceSarbacane();
-        if($result < 0) {
-            dol_syslog(get_class($this)."::getSarbacaneCampaignStatus ".$this->error, LOG_ERR);
-            return -1;
-        }
-
-        $opts['campaign_id'] = $this->sarbacane_id;
-        // Call
-        try {
-            $response = $this->sarbacane->get_campaign_v2(array("id" => $this->sarbacane_id));
-            $this->sarbacane_webid = $response;
-        }
-        catch(Exception $e) {
-            $this->error = $e->getMessage();
-            dol_syslog(get_class($this)."::getListCampaign ".$this->error, LOG_ERR);
-            return -1;
-        }
-        if($mode == 1) {
-            return DolSarbacane::getLibStatus($response['data'][0]['status']);
-        }
-        else if($mode == 0) {
-            return $response['data'][0]['status'];
-        }
+//        $result = $this->getInstanceSarbacane();
+//        if($result < 0) {
+//            dol_syslog(get_class($this)."::getSarbacaneCampaignStatus ".$this->error, LOG_ERR);
+//            return -1;
+//        }
+//
+//        $opts['campaign_id'] = $this->sarbacane_id;
+//        // Call
+//        try {
+//            $response = $this->sarbacane->get_campaign_v2(array("id" => $this->sarbacane_id));
+//            $this->sarbacane_webid = $response;
+//        }
+//        catch(Exception $e) {
+//            $this->error = $e->getMessage();
+//            dol_syslog(get_class($this)."::getListCampaign ".$this->error, LOG_ERR);
+//            return -1;
+//        }
+//        if($mode == 1) {
+//            return DolSarbacane::getLibStatus($response['data'][0]['status']);
+//        }
+//        else if($mode == 0) {
+//            return $response['data'][0]['status'];
+//        }
     }
 
     /**
@@ -879,20 +913,9 @@ class DolSarbacane extends CommonObject {
             dol_syslog(get_class($this)."::sendSarbacaneCampaign ".$this->error, LOG_ERR);
             return -1;
         }
-        $data = array(
-            "id" => $this->sarbacane_id,
-            "listid" => array($this->sarbacane_listid),
-            "send_now" => 1
-        );
 
         try {
-            $response = $this->sarbacane->update_campaign($data);
-            if($response['code'] == 'failure') {
-
-                $this->error = $response['message'];
-
-                return -1;
-            }
+            $this->sarbacane->post('/campaigns/'.$this->sarbacane_id.'/send',array());
         }
         catch(Exception $e) {
             $this->error = $e->getMessage();
@@ -1105,104 +1128,6 @@ class DolSarbacane extends CommonObject {
             return 1;
         }
     }*/
-
-    /**
-     * Create the capaign on Sarbacane
-     *
-     * @param user $user
-     * @return int <0 if KO, >0 if OK
-     */
-    function createSarbacaneCampaign($user) {
-        $result = $this->getInstanceSarbacane();
-        if($result < 0) {
-            dol_syslog(get_class($this)."::createSarbacaneCampaign ".$this->error, LOG_ERR);
-            return -1;
-        }
-        $data = array(
-            "category" => 'Send by dolibarr',
-            "from_name" => $this->sarbacane_sender_name,
-            "name" => $this->currentmailing->titre,
-            "html_content" => $this->currentmailing->body,
-            "listid" => array($this->sarbacane_listid),
-            "subject" => $this->currentmailing->sujet,
-            "from_email" => $this->currentmailing->email_from,
-            "reply_to" => $this->currentmailing->email_from
-        );
-        /*
-                $type = 'regular';
-                $recipients = new stdClass();
-                $settings = new stdClass();
-                $tracking = new stdClass();
-
-                $recipients->segment_opts = new stdClass();
-                $recipients->list_id = $this->sarbacane_listid;
-                $recipients->segment_opts->match = 'all';
-
-                $conditions = new stdClass();
-                $conditions->field = 'static_segment';
-                $conditions->op = 'static_is';
-                $conditions->value = $this->sarbacane_segmentid;
-
-                $recipients->segment_opts->conditions = array();
-                $recipients->segment_opts->conditions = array(
-                        $conditions
-                );
-
-                $settings->subject_line = $this->currentmailing->sujet;
-
-                $settings->reply_to = $this->currentmailing->email_from;
-                $settings->from_name = $this->sarbacane_sender_name;
-                $settings->authenticate = true;
-                $settings->title = $this->currentmailing->titre;
-                $tracking->opens = true;
-                $tracking->html_clicks = true;
-
-                $content = array(
-                        'html' => $this->currentmailing->body,
-                        'plain_text' => $this->currentmailing->body
-                );
-        */
-        if(empty($this->sarbacane_id)) {
-            try {
-
-                $response = $this->sarbacane->create_campaign($data);
-
-                if($response['code'] == 'failure') {
-
-                    $this->error = $response['message'];
-                    return -1;
-                }
-                //var_dump($response);exit;
-            }
-            catch(Exception $e) {
-                $this->error = $e->getMessage();
-                dol_syslog(get_class($this)."::createSarbacaneCampaign ".$this->error, LOG_ERR);
-                return -1;
-            }
-            $this->sarbacane_id = $response['data']['id'];
-            $opts['campaign_id'] = $this->sarbacane_id;
-            try {
-                $response = $this->sarbacane->get_campaign_v2(array("id" => $this->sarbacane_id));
-            }
-            catch(Exception $e) {
-                $this->error = $e->getMessage();
-                dol_syslog(get_class($this)."::createSarbacaneCampaign ".$this->error, LOG_ERR);
-                return -1;
-            }
-
-            $array_rep = $response['data'];
-            $newcampaign = $array_rep[0];
-
-            $this->sarbacane_webid = $newcampaign['web_id'];
-
-            $result = $this->update($user);
-            if($result < 0) {
-                return -1;
-            }
-        }
-
-        return 1;
-    }
 
     /**
      * Renvoi le libelle d'un statut donne
