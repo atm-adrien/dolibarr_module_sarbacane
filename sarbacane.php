@@ -310,7 +310,15 @@ $extralabels=$extrafields->fetch_name_optionals_label('mailing');
 
 llxHeader('',$langs->trans("Mailing"));
 
-
+//if ($action=='updatesarbacanecampaignstatus') {
+//	$result=$sarbacane->updateSarbacaneCampaignStatus();
+//	var_dump($result, $sarbacane->error);exit;
+//	if ($result<0) {
+//		setEventMessage($sarbacane->error,'errors');
+//	} else {
+//		setEventMessage($langs->trans('SarbacaneCampaignUpdated'));
+//	}
+//}
 
 $head = emailing_prepare_head($object);
 
@@ -551,6 +559,7 @@ if ( !empty($conf->global->SARBACANE_API_KEY)) {
 				print '<a class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->transnoentitiesnoconv("NotEnoughPermissions")).'">'.$langs->trans("SendMailing").'</a>';
 			} else {
 				print '<a class="butAction" href="'.$_SERVER['PHP_SELF'].'?action=sendsarbacanecampaign&amp;id='.$object->id.'">'.$langs->trans("SarbacaneSendMailing").'</a>';
+//				print '<a class="butAction" href="'.$_SERVER['PHP_SELF'].'?action=updatesarbacanecampaignstatus&amp;id='.$object->id.'">'.$langs->trans("SarbacaneUpdateStatus").'</a>';
 			}
 		}
 	}
@@ -560,7 +569,7 @@ if ( !empty($conf->global->SARBACANE_API_KEY)) {
 			if ((! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! $user->rights->mailing->mailing_advance->send)) {
 				print '<a class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->transnoentitiesnoconv("NotEnoughPermissions")).'">'.$langs->trans("SendMailing").'</a>';
 			} else {
-				print '<a class="butAction" href="'.$_SERVER['PHP_SELF'].'?action=updatesarbacanecampaignstatus&amp;id='.$object->id.'">'.$langs->trans("SarbacaneUpdateStatus").'</a>';
+//				print '<a class="butAction" href="'.$_SERVER['PHP_SELF'].'?action=updatesarbacanecampaignstatus&amp;id='.$object->id.'">'.$langs->trans("SarbacaneUpdateStatus").'</a>';
 			}
 		}
 		//TODO: manage with jquery to avoid timeout browser

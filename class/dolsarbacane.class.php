@@ -1232,9 +1232,39 @@ class DolSarbacane extends CommonObject {
         return $result;
     }
 
+    public function updateSarbacaneCampaignStatus() {
+        global $conf;
+
+        $result = $this->getInstanceSarbacane();
+        if($result < 0) {
+            dol_syslog(get_class($this)."::sendSarbacaneCampaign ".$this->error, LOG_ERR);
+            return -1;
+        }
+
+        try {
+            $ret = $this->sarbacane->get('/campaigns/'.$this->sarbacane_id.'/recipients',array());
+        }
+        catch(Exception $e) {
+            $this->error = $e->getMessage();
+            dol_syslog(get_class($this)."::sendSarbacaneCampaign ".$this->error, LOG_ERR);
+            return -1;
+        }
+        var_dump($ret);
+         try {
+            $ret = $this->sarbacane->get('/lists/'.$this->sarbacane_listid.'/contacts',array());
+        }
+        catch(Exception $e) {
+            $this->error = $e->getMessage();
+            dol_syslog(get_class($this)."::sendSarbacaneCampaign ".$this->error, LOG_ERR);
+            return -1;
+        }
+        var_dump($ret);
+        exit;
+    }
+
 }
-class DolSarbacaneeMailLine
-{
+
+class DolSarbacaneeMailLine {
 	var $id;
 	var $email;
 	var $thirdparty;
