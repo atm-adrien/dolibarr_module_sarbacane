@@ -30,7 +30,7 @@ if (!empty($fk_user) && $user->id != $fk_user)
 
 
 $get=GETPOST('get', 'none');
-//$async_action=GETPOST('async_action', 'none');
+$async_action=GETPOST('async_action', 'none');
 $set=GETPOST('set', 'none');
 
 if (empty($listid)) $listid = GETPOST('listid', 'none');

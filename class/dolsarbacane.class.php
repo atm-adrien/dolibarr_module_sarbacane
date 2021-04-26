@@ -58,6 +58,8 @@ class DolSarbacane extends CommonObject {
     var $tms = '';
     var $currentmailing;
     var $lines = array();
+    public static $list_contact_table = 'sarbacane_list_contact';
+    public static $campaign_contact_table = 'sarbacane_campaign_contact';
 
     /**
      * Constructor
@@ -711,6 +713,7 @@ class DolSarbacane extends CommonObject {
                     'email_address' => $tmp_array[0],
                     'status' => 'subscribed',
                     'email_type' => 'html',
+                    'tmp_array' => $tmp_array,
                     'merge_vars' => $merge_vars
                 );
             }
@@ -728,10 +731,29 @@ class DolSarbacane extends CommonObject {
             if(! empty($email)) {
                 try {
                     $data = array(
-                        "email" => $email['email_address']
+                        "email" => $email['email_address'],
+                        "phone" => "",
+                        "CIVILITY_ID" => '',
+                        "FIRSTNAME_ID" => '',
+                        "LASTNAME_ID" => '',
                     );
-
-                    $response = $this->sarbacane->post('lists/'.$listid.'/contacts/upsert', $data);
+                    if($email['tmp_array'][1] == 'contact') {
+                        $ret = $this->getSarbacaneContactIdByListId($email['tmp_array'][2], $listid);
+                        var_dump($this->sarbacane->get('lists/'.$listid.'/contacts', array()));
+                        if(empty($ret)) {
+                            $response = $this->sarbacane->post('lists/'.$listid.'/contacts', $data);
+                            if(!empty($response[0])) {
+                                $ret = $this->insertListContact($listid, $response[0], $email['tmp_array'][2]);
+                                if($ret < 0)  $error++;
+                            }
+                        } else {
+                            //modify
+                            var_dump('lists/'.$listid.'/contacts/'.$ret, $data);
+                            $response = $this->sarbacane->put('lists/'.$listid.'/contacts/ZYWvhgy8Rm2Zrldqkdv2ww', $data);
+                            var_dump($response);exit;
+                        }
+                    }
+                    else $response = $this->sarbacane->post('lists/'.$listid.'/contacts/upsert', $data);
                 }
                 catch(Exception $e) {
                     $this->errors[] = $e->getMessage();
@@ -752,6 +774,53 @@ class DolSarbacane extends CommonObject {
         }
     }
 
+    public function getSarbacaneContactIdByListId($fk_contact, $listid) {
+        $sql = 'SELECT sarbacane_contactlistid FROM '.MAIN_DB_PREFIX.$this::$list_contact_table.' WHERE fk_contact='.$fk_contact.' AND sarbacane_listid="'.$listid.'"';
+
+        $resql = $this->db->query($sql);
+        if(!empty($resql) && $this->db->num_rows($resql) > 0) {
+            $obj = $this->db->fetch_object($resql);
+            return $obj->sarbacane_contactlistid;
+        }
+        else return 0;
+
+    }
+
+    public function insertListContact($listid, $sarbacane_contactid ,$contactid) {
+        global $user;
+        $error = 0;
+
+        $sql = 'INSERT INTO '.MAIN_DB_PREFIX.$this::$list_contact_table.' (fk_contact, sarbacane_listid, sarbacane_contactlistid, fk_user_author, datec, fk_user_mod)
+                VALUES ('.$contactid.', "'.$listid.'","'.$sarbacane_contactid.'",'.$user->id.',NOW(),'.$user->id.')';
+        $this->db->begin();
+
+        dol_syslog(get_class($this)."::create sql=".$sql, LOG_DEBUG);
+        $resql = $this->db->query($sql);
+        if(! $resql) {
+            $error++;
+            $this->errors[] = "Error ".$this->db->lasterror();
+        }
+
+        if(! $error) {
+            $id = $this->db->last_insert_id(MAIN_DB_PREFIX."sarbacane");
+
+            // Commit or rollback
+            if($error) {
+                foreach($this->errors as $errmsg) {
+                    dol_syslog(get_class($this)."::create ".$errmsg, LOG_ERR);
+                    $this->error .= ($this->error ? ', '.$errmsg : $errmsg);
+                }
+                $this->db->rollback();
+                return -1 * $error;
+            }
+            else {
+                $this->db->commit();
+                return $id;
+            }
+        }
+        return -2;
+    }
+
     /**
      * Change mail adresses to lower case
      *
@@ -762,7 +831,7 @@ class DolSarbacane extends CommonObject {
             foreach($TMail as &$email) $email = strtolower($email);
         }
     }
-    
+
     function createSarbacaneCampaign($user) {
 		$result = $this->getInstanceSarbacane();
 		if ($result < 0) {
