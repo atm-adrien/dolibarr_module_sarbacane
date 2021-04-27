@@ -554,7 +554,7 @@ class DolSarbacane extends CommonObject {
     /**
      * Retreive Sarbacane Contact Lists
      *
-     * @param array  $filters
+     * @param array $filters
      * @return int <0 if KO, >0 if OK
      */
     function getListDestinaries($filters = array()) {
@@ -687,6 +687,7 @@ class DolSarbacane extends CommonObject {
                     if(! empty($contactstatic->id)) {
                         $merge_vars->FNAME = $contactstatic->firstname;
                         $merge_vars->LNAME = $contactstatic->lastname;
+                        $merge_vars->CIVILITY = $contactstatic->civility;
                         $merge_vars->EMAIL = $tmp_array[0];
                     }
                 }
@@ -732,25 +733,43 @@ class DolSarbacane extends CommonObject {
                 try {
                     $data = array(
                         "email" => $email['email_address'],
-                        "phone" => "",
-                        "CIVILITY_ID" => '',
-                        "FIRSTNAME_ID" => '',
-                        "LASTNAME_ID" => '',
+                        "phone" => ""
                     );
                     if($email['tmp_array'][1] == 'contact') {
-                        $ret = $this->getSarbacaneContactIdByListId($email['tmp_array'][2], $listid);
-                        var_dump($this->sarbacane->get('lists/'.$listid.'/contacts', array()));
-                        if(empty($ret)) {
-                            $response = $this->sarbacane->post('lists/'.$listid.'/contacts', $data);
-                            if(!empty($response[0])) {
-                                $ret = $this->insertListContact($listid, $response[0], $email['tmp_array'][2]);
-                                if($ret < 0)  $error++;
+                        $found = 0;
+
+                        $civ_id = 'CIVILITY_ID';
+                        $name_id = 'LASTNAME_ID';
+                        $firstname_id = 'FIRSTNAME_ID';
+
+                        $TSarbacaneFields = $this->sarbacane->get('lists/'.$listid.'/fields', array());
+
+                        if(! empty($TSarbacaneFields)) {
+                            foreach($TSarbacaneFields['fields'] as $field) {
+                                if($field['caption'] == 'Civilité') $civ_id = $field['id'];
+                                if($field['caption'] == 'Nom') $name_id = $field['id'];
+                                if($field['caption'] == 'Prénom') $firstname_id = $field['id'];
                             }
-                        } else {
-                            //modify
-                            var_dump('lists/'.$listid.'/contacts/'.$ret, $data);
-                            $response = $this->sarbacane->put('lists/'.$listid.'/contacts/ZYWvhgy8Rm2Zrldqkdv2ww', $data);
-                            var_dump($response);exit;
+                        }
+
+                        $data[$civ_id] = $email['merge_vars']->CIVILITY;
+                        $data[$name_id] = $email['merge_vars']->FNAME;
+                        $data[$firstname_id] = $email['merge_vars']->LNAME;
+
+                        $TSarbacaneIds = $this->getSarbacaneContactIdByListId($email['tmp_array'][2], $listid);
+                        $TSarbacaneContacts = $this->sarbacane->get('lists/'.$listid.'/contacts', array());
+                        foreach($TSarbacaneContacts as $contact) {
+                            if(in_array($contact['id'], $TSarbacaneIds)) $found = 1;
+                        }
+                        if(empty($TSarbacaneIds) || ! $found) {
+                            $response = $this->sarbacane->post('lists/'.$listid.'/contacts', $data);
+                            if(! empty($response[0])) {
+                                $ret = $this->upsertListContact($listid, $response[0], $email['tmp_array'][2]);
+                                if($ret < 0) $error++;
+                            }
+                        }
+                        else {
+                            foreach($TSarbacaneIds as $fk_sarbacane) $response = $this->sarbacane->put('lists/'.$listid.'/contacts/'.$fk_sarbacane, $data);
                         }
                     }
                     else $response = $this->sarbacane->post('lists/'.$listid.'/contacts/upsert', $data);
@@ -775,23 +794,29 @@ class DolSarbacane extends CommonObject {
     }
 
     public function getSarbacaneContactIdByListId($fk_contact, $listid) {
+        $TIds = array();
         $sql = 'SELECT sarbacane_contactlistid FROM '.MAIN_DB_PREFIX.$this::$list_contact_table.' WHERE fk_contact='.$fk_contact.' AND sarbacane_listid="'.$listid.'"';
 
         $resql = $this->db->query($sql);
-        if(!empty($resql) && $this->db->num_rows($resql) > 0) {
-            $obj = $this->db->fetch_object($resql);
-            return $obj->sarbacane_contactlistid;
+        if(! empty($resql) && $this->db->num_rows($resql) > 0) {
+            while($obj = $this->db->fetch_object($resql)) {
+                $TIds[] = $obj->sarbacane_contactlistid;
+            }
         }
-        else return 0;
 
+        return $TIds;
     }
 
-    public function insertListContact($listid, $sarbacane_contactid ,$contactid) {
+    public function upsertListContact($listid, $sarbacane_contactid, $contactid) {
         global $user;
         $error = 0;
 
-        $sql = 'INSERT INTO '.MAIN_DB_PREFIX.$this::$list_contact_table.' (fk_contact, sarbacane_listid, sarbacane_contactlistid, fk_user_author, datec, fk_user_mod)
-                VALUES ('.$contactid.', "'.$listid.'","'.$sarbacane_contactid.'",'.$user->id.',NOW(),'.$user->id.')';
+        $sql = 'DELETE FROM '.MAIN_DB_PREFIX.$this::$list_contact_table.' WHERE fk_contact='.$contactid.' AND sarbacane_listid="'.$listid.'";';
+        $resql = $this->db->query($sql);
+
+        $sql = ' INSERT INTO '.MAIN_DB_PREFIX.$this::$list_contact_table.' (fk_contact, sarbacane_listid, sarbacane_contactlistid, fk_user_author, datec, fk_user_mod)
+                VALUES ('.$contactid.', "'.$listid.'","'.$sarbacane_contactid.'",'.$user->id.',NOW(),'.$user->id.');';
+
         $this->db->begin();
 
         dol_syslog(get_class($this)."::create sql=".$sql, LOG_DEBUG);
@@ -833,51 +858,53 @@ class DolSarbacane extends CommonObject {
     }
 
     function createSarbacaneCampaign($user) {
-		$result = $this->getInstanceSarbacane();
-		if ($result < 0) {
-			dol_syslog(get_class($this) . "::createSarbacaneCampaign " . $this->error, LOG_ERR);
-			return - 1;
-		}
-		$data =array(
-				"aliasFrom" =>$this->sarbacane_sender_name,
-				"aliasReplyTo" =>$this->sarbacane_sender_name,
-				 "name" => $this->currentmailing->titre,
-				 "listid"=>array($this->sarbacane_listid),
-				 "subject"=>$this->currentmailing->sujet,
-				 "emailFrom"=>$this->currentmailing->email_from,
-				 "emailReplyTo"=>$this->currentmailing->email_from);
+        $result = $this->getInstanceSarbacane();
+        if($result < 0) {
+            dol_syslog(get_class($this)."::createSarbacaneCampaign ".$this->error, LOG_ERR);
+            return -1;
+        }
+        $data = array(
+            "aliasFrom" => $this->sarbacane_sender_name,
+            "aliasReplyTo" => $this->sarbacane_sender_name,
+            "name" => $this->currentmailing->titre,
+            "listid" => array($this->sarbacane_listid),
+            "subject" => $this->currentmailing->sujet,
+            "emailFrom" => $this->currentmailing->email_from,
+            "emailReplyTo" => $this->currentmailing->email_from
+        );
 
-		if (empty($this->sarbacane_id)) {
-			try {
+        if(empty($this->sarbacane_id)) {
+            try {
 
-				$response = $this->sarbacane->post('campaigns/email',$data);
-                if(empty($response['id'])){
+                $response = $this->sarbacane->post('campaigns/email', $data);
+                if(empty($response['id'])) {
 
                     $this->error = $response['message'];
                     return -1;
                 }
                 $this->sarbacane_id = $response['id'];
                 $this->sarbacane_webid = $this->sarbacane_id;
-                $this->sarbacane->post('/campaigns/'.$this->sarbacane_id.'/list',array("listId"=>$this->sarbacane_listid));
-                $response = $this->sarbacane->get('/campaigns/'.$this->sarbacane_id,array());
+                $this->sarbacane->post('/campaigns/'.$this->sarbacane_id.'/list', array("listId" => $this->sarbacane_listid));
+                $response = $this->sarbacane->get('/campaigns/'.$this->sarbacane_id, array());
                 $sendId = $response['campaign']['sends'][0];
-                $this->sarbacane->post('/campaigns/'.$this->sarbacane_id.'/send/'.$sendId.'/content',array("html"=>$this->currentmailing->body));
-			} catch ( Exception $e ) {
-				$this->error = $e->getMessage();
-				exit;
-				dol_syslog(get_class($this) . "::createSarbacaneCampaign " . $this->error, LOG_ERR);
-				return - 1;
-			}
+                $this->sarbacane->post('/campaigns/'.$this->sarbacane_id.'/send/'.$sendId.'/content', array("html" => $this->currentmailing->body));
+                //TODO
+            }
+            catch(Exception $e) {
+                $this->error = $e->getMessage();
+                exit;
+                dol_syslog(get_class($this)."::createSarbacaneCampaign ".$this->error, LOG_ERR);
+                return -1;
+            }
 
+            $result = $this->update($user);
+            if($result < 0) {
+                return -1;
+            }
+        }
 
-			$result = $this->update($user);
-			if ($result < 0) {
-				return - 1;
-			}
-		}
-
-		return 1;
-	}
+        return 1;
+    }
 
     function createList($namelist) {
         if(empty($this->sarbacane)) {
@@ -888,14 +915,17 @@ class DolSarbacane extends CommonObject {
             }
         }
         $response = $this->sarbacane->post('lists', array('name' => $namelist));
-
         if(empty($response['id'])) {
             $this->error = $response['message'];
             $this->errors[] = $this->error;
             return -1;
         }
+        $listid = $response['id'];
 
-        return $response['id'];
+        $response = $this->sarbacane->post('lists/'.$listid.'/fields', array('kind' => 'RADIO', 'caption' => 'Civilité'));
+        $response = $this->sarbacane->post('lists/'.$listid.'/fields', array('kind' => 'STRING', 'caption' => 'Prénom'));
+        $response = $this->sarbacane->post('lists/'.$listid.'/fields', array('kind' => 'STRING', 'caption' => 'Nom'));
+        return $listid;
     }
 
     /**
@@ -984,7 +1014,7 @@ class DolSarbacane extends CommonObject {
         }
 
         try {
-            $this->sarbacane->post('/campaigns/'.$this->sarbacane_id.'/send',array());
+            $this->sarbacane->post('/campaigns/'.$this->sarbacane_id.'/send', array());
         }
         catch(Exception $e) {
             $this->error = $e->getMessage();
@@ -1288,6 +1318,7 @@ class DolSarbacane extends CommonObject {
 
         return $result;
     }
+
     function getExternalNomUrl() {
         require_once DOL_DOCUMENT_ROOT.'/comm/mailing/class/mailing.class.php';
         $object = new Mailing($this->db);
@@ -1311,7 +1342,7 @@ class DolSarbacane extends CommonObject {
         }
 
         try {
-            $ret = $this->sarbacane->get('/campaigns/'.$this->sarbacane_id.'/recipients',array());
+            $ret = $this->sarbacane->get('/campaigns/'.$this->sarbacane_id.'/recipients', array());
         }
         catch(Exception $e) {
             $this->error = $e->getMessage();
@@ -1319,8 +1350,8 @@ class DolSarbacane extends CommonObject {
             return -1;
         }
         var_dump($ret);
-         try {
-            $ret = $this->sarbacane->get('/lists/'.$this->sarbacane_listid.'/contacts',array());
+        try {
+            $ret = $this->sarbacane->get('/lists/'.$this->sarbacane_listid.'/contacts', array());
         }
         catch(Exception $e) {
             $this->error = $e->getMessage();
@@ -1334,65 +1365,65 @@ class DolSarbacane extends CommonObject {
 }
 
 class DolSarbacaneeMailLine {
-	var $id;
-	var $email;
-	var $thirdparty;
-	var $contactfullname;
-	var $type;
+    var $id;
+    var $email;
+    var $thirdparty;
+    var $contactfullname;
+    var $type;
 
-	/**
-	 * Constructor
-	 */
-	function __construct() {
-		return 0;
-	}
+    /**
+     * Constructor
+     */
+    function __construct() {
+        return 0;
+    }
 }
-class DolSarbacaneTargetLine extends DolSarbacane
-{
-	var $email;
-	var $status;
 
-	/**
-	 * Constructor
-	 */
-	function __construct($db) {
-		parent::__construct($db);
-		return 0;
-	}
+class DolSarbacaneTargetLine extends DolSarbacane {
+    var $email;
+    var $status;
+
+    /**
+     * Constructor
+     */
+    function __construct($db) {
+        parent::__construct($db);
+        return 0;
+    }
 }
-class DolSarbacaneActivitesLine
-{
-	public $campaign;
-	public $campaignid;
-	public $fk_mailing;
-	public $activites = array();
 
-	/**
-	 * Constructor
-	 */
-	function __construct() {
-		return 0;
-	}
+class DolSarbacaneActivitesLine {
+    public $campaign;
+    public $campaignid;
+    public $fk_mailing;
+    public $activites = array();
+
+    /**
+     * Constructor
+     */
+    function __construct() {
+        return 0;
+    }
 }
-class DolSarbacaneLine
-{
-	public $id;
-	public $entity;
-	public $fk_mailing;
-	public $sarbacane_id;
-	public $sarbacane_webid;
-	public $sarbacane_listid;
-	public $sarbacane_segmentid;
-	public $sarbacane_sender_name;
-	public $fk_user_author;
-	public $datec = '';
-	public $fk_user_mod;
-	public $tms = '';
 
-	/**
-	 * Constructor
-	 */
-	function __construct() {
-		return 0;
-	}
+class DolSarbacaneLine {
+    public $id;
+    public $entity;
+    public $fk_mailing;
+    public $sarbacane_id;
+    public $sarbacane_webid;
+    public $sarbacane_listid;
+    public $sarbacane_segmentid;
+    public $sarbacane_sender_name;
+    public $fk_user_author;
+    public $datec = '';
+    public $fk_user_mod;
+    public $tms = '';
+
+    /**
+     * Constructor
+     */
+    function __construct() {
+        return 0;
+    }
 }

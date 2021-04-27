@@ -60,8 +60,8 @@ class Sarbacane extends CommonObject {
         if(curl_errno($ch)) {
             throw new RuntimeException('cURL error: '.curl_error($ch));
         }
-        if($info['http_code'] > 400) {
-            throw new RuntimeException($data);
+        if($info['http_code'] != 200) {
+            throw new RuntimeException('Error during '.$method.' '.$resource.' : '.$data);
         }
         curl_close($ch);
         return json_decode($data, true);
