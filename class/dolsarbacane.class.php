@@ -827,12 +827,12 @@ class DolSarbacane extends CommonObject {
         }
 
         if(! $error) {
-            $id = $this->db->last_insert_id(MAIN_DB_PREFIX."sarbacane");
+            $id = $this->db->last_insert_id(MAIN_DB_PREFIX.$this::$list_contact_table);
 
             // Commit or rollback
             if($error) {
                 foreach($this->errors as $errmsg) {
-                    dol_syslog(get_class($this)."::create ".$errmsg, LOG_ERR);
+                    dol_syslog(get_class($this)."::upsertListContact ".$errmsg, LOG_ERR);
                     $this->error .= ($this->error ? ', '.$errmsg : $errmsg);
                 }
                 $this->db->rollback();
@@ -884,15 +884,27 @@ class DolSarbacane extends CommonObject {
                 }
                 $this->sarbacane_id = $response['id'];
                 $this->sarbacane_webid = $this->sarbacane_id;
+                //Import de la liste dans la campagne
                 $this->sarbacane->post('/campaigns/'.$this->sarbacane_id.'/list', array("listId" => $this->sarbacane_listid));
+                //Ajout du contenu html
                 $response = $this->sarbacane->get('/campaigns/'.$this->sarbacane_id, array());
                 $sendId = $response['campaign']['sends'][0];
                 $this->sarbacane->post('/campaigns/'.$this->sarbacane_id.'/send/'.$sendId.'/content', array("html" => $this->currentmailing->body));
-                //TODO
+
+                //Liaison campagne contact id & contact dolibarr
+                $TRecipient = $this->sarbacane->get('/campaigns/'.$this->sarbacane_id.'/recipients', array());
+                $this->getEmailMailingDolibarr('toadd');
+
+                if(!empty($TRecipient)) {
+                    foreach($TRecipient as $recipient) {
+                        $fk_contact = $this->getContactDolibarrIdByMail($recipient['email']);
+
+                        if(!empty($fk_contact)) $this->upsertCampaignContact($recipient['id'], $fk_contact);
+                    }
+                }
             }
             catch(Exception $e) {
                 $this->error = $e->getMessage();
-                exit;
                 dol_syslog(get_class($this)."::createSarbacaneCampaign ".$this->error, LOG_ERR);
                 return -1;
             }
@@ -904,6 +916,56 @@ class DolSarbacane extends CommonObject {
         }
 
         return 1;
+    }
+    public function getContactDolibarrIdByMail ($email) {
+        if(!empty($this->email_lines)){
+            foreach($this->email_lines as $email_line) {
+                $tmp_array = explode('&', $email_line);
+                if($tmp_array[0] == $email && $tmp_array[1] == 'contact') return $tmp_array[2];
+            }
+        }
+
+        return 0;
+    }
+
+    public function upsertCampaignContact($sarbacane_contactid, $contactid) {
+        global $user;
+        $error = 0;
+
+        $sql = 'DELETE FROM '.MAIN_DB_PREFIX.$this::$campaign_contact_table.' WHERE fk_contact='.$contactid.' AND sarbacane_campaignid="'.$this->sarbacane_id.'";';
+        $resql = $this->db->query($sql);
+
+        $sql = ' INSERT INTO '.MAIN_DB_PREFIX.$this::$campaign_contact_table.' (fk_contact, sarbacane_campaignid, sarbacane_contactcampaignid, fk_user_author, datec, fk_user_mod)
+                VALUES ('.$contactid.', "'.$this->sarbacane_id.'","'.$sarbacane_contactid.'",'.$user->id.',NOW(),'.$user->id.');';
+
+        $this->db->begin();
+
+        dol_syslog(get_class($this)."::create sql=".$sql, LOG_DEBUG);
+        $resql = $this->db->query($sql);
+
+        if(! $resql) {
+            $error++;
+            $this->errors[] = "Error ".$this->db->lasterror();
+        }
+
+        if(! $error) {
+            $id = $this->db->last_insert_id(MAIN_DB_PREFIX.$this::$campaign_contact_table);
+
+            // Commit or rollback
+            if($error) {
+                foreach($this->errors as $errmsg) {
+                    dol_syslog(get_class($this)."::upsertCampaignContact ".$errmsg, LOG_ERR);
+                    $this->error .= ($this->error ? ', '.$errmsg : $errmsg);
+                }
+                $this->db->rollback();
+                return -1 * $error;
+            }
+            else {
+                $this->db->commit();
+                return $id;
+            }
+        }
+        return -2;
     }
 
     function createList($namelist) {
