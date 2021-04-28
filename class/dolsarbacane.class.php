@@ -533,6 +533,10 @@ class DolSarbacane extends CommonObject {
         }
     }
 
+    /**
+     * @return int
+     * @throws Exception
+     */
     private function getInstanceSarbacane() {
         global $conf, $langs;
 
@@ -793,6 +797,11 @@ class DolSarbacane extends CommonObject {
         }
     }
 
+    /**
+     * @param $fk_contact
+     * @param $listid
+     * @return array
+     */
     public function getSarbacaneContactIdByListId($fk_contact, $listid) {
         $TIds = array();
         $sql = 'SELECT sarbacane_contactlistid FROM '.MAIN_DB_PREFIX.$this::$list_contact_table.' WHERE fk_contact='.$fk_contact.' AND sarbacane_listid="'.$listid.'"';
@@ -807,6 +816,13 @@ class DolSarbacane extends CommonObject {
         return $TIds;
     }
 
+    /**
+     * @param $listid
+     * @param $sarbacane_contactid
+     * @param $contactid
+     * @return float|int
+     * @throws Exception
+     */
     public function upsertListContact($listid, $sarbacane_contactid, $contactid) {
         global $user;
         $error = 0;
@@ -857,6 +873,11 @@ class DolSarbacane extends CommonObject {
         }
     }
 
+    /**
+     * @param $user
+     * @return int
+     * @throws Exception
+     */
     function createSarbacaneCampaign($user) {
         $result = $this->getInstanceSarbacane();
         if($result < 0) {
@@ -917,6 +938,11 @@ class DolSarbacane extends CommonObject {
 
         return 1;
     }
+
+    /**
+     * @param $email
+     * @return int|mixed|string
+     */
     public function getContactDolibarrIdByMail ($email) {
         if(!empty($this->email_lines)){
             foreach($this->email_lines as $email_line) {
@@ -928,6 +954,12 @@ class DolSarbacane extends CommonObject {
         return 0;
     }
 
+    /**
+     * @param $sarbacane_contactid
+     * @param $contactid
+     * @return float|int
+     * @throws Exception
+     */
     public function upsertCampaignContact($sarbacane_contactid, $contactid) {
         global $user;
         $error = 0;
@@ -968,6 +1000,11 @@ class DolSarbacane extends CommonObject {
         return -2;
     }
 
+    /**
+     * @param $namelist
+     * @return int|mixed
+     * @throws Exception
+     */
     function createList($namelist) {
         if(empty($this->sarbacane)) {
             $result = $this->getInstanceSarbacane();
@@ -1381,6 +1418,9 @@ class DolSarbacane extends CommonObject {
         return $result;
     }
 
+    /**
+     * @return string
+     */
     function getExternalNomUrl() {
         require_once DOL_DOCUMENT_ROOT.'/comm/mailing/class/mailing.class.php';
         $object = new Mailing($this->db);
@@ -1394,6 +1434,10 @@ class DolSarbacane extends CommonObject {
         return $result;
     }
 
+    /**
+     * @return int
+     * @throws Exception
+     */
     public function updateSarbacaneCampaignStatus() {
         global $conf;
 
