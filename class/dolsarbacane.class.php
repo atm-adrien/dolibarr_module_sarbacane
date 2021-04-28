@@ -753,8 +753,8 @@ class DolSarbacane extends CommonObject {
                         }
 
                         $data[$civ_id] = $email['merge_vars']->CIVILITY;
-                        $data[$name_id] = $email['merge_vars']->FNAME;
-                        $data[$firstname_id] = $email['merge_vars']->LNAME;
+                        $data[$name_id] = $email['merge_vars']->LNAME;
+                        $data[$firstname_id] = $email['merge_vars']->FNAME;
 
                         $TSarbacaneIds = $this->getSarbacaneContactIdByListId($email['tmp_array'][2], $listid);
                         $TSarbacaneContacts = $this->sarbacane->get('lists/'.$listid.'/contacts', array());
