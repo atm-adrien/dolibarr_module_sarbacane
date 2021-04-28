@@ -1,0 +1,1 @@
+ALTER TABLE llx_sarbacane_list_contact ADD INDEX uk_fk_contact (fk_contact);
