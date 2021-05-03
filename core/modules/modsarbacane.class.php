@@ -140,7 +140,9 @@ class modsarbacane extends DolibarrModules
 		// 'thirdparty'       to add a tab in third party view
 		// 'user'             to add a tab in user view
         $this->tabs = array(
-                'emailing:+tabSarbacaneSending:SarbacaneSending:sarbacane@sarbacane:$user->rights->mailing->creer:/sarbacane/sarbacane.php?id=__ID__');
+                'emailing:+tabSarbacaneSending:SarbacaneSending:sarbacane@sarbacane:$user->rights->mailing->creer:/sarbacane/sarbacane.php?id=__ID__'
+                ,'contact:+tabSarbacaneSending:SarbacaneSending:sarbacane@sarbacane:$user->rights->mailing->creer:/sarbacane/contact_tab.php?id=__ID__'
+		);
 
         // Dictionaries
 	    if (! isset($conf->sarbacane->enabled))
