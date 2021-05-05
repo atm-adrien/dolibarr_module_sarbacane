@@ -611,6 +611,21 @@ class DolSarbacane extends CommonObject {
     }
 
     /**
+     * Retreive stats for sarbacane campaign
+     *
+     * @return int <0 if KO, >0 if OK
+     */
+    function getCampaignRecipientStat($campaignId) {
+        global $conf;
+        $this->getInstanceSarbacane();
+        $error = 0;
+
+        $result = $this->sarbacane->get('reports/'.$campaignId.'/recipients', array());
+
+        return $result;
+    }
+
+    /**
      * Check if sender mail is already a validated sender
      *
      * @param string $mail_sender use to send mails
@@ -910,7 +925,7 @@ class DolSarbacane extends CommonObject {
                 //Ajout du contenu html
                 $response = $this->sarbacane->get('/campaigns/'.$this->sarbacane_id, array());
                 $sendId = $response['campaign']['sends'][0];
-                $this->sarbacane->post('/campaigns/'.$this->sarbacane_id.'/send/'.$sendId.'/content', array("html" => $this->currentmailing->body));
+                $this->sarbacane->post('/campaigns/'.$this->sarbacane_id.'/send/'.$sendId.'/content', array("html" => $this->currentmailing->body.'<br><a href="{{unsubscribe}}">D&eacute;sinscription</a>'));
 
                 //Liaison campagne contact id & contact dolibarr
                 $TRecipient = $this->sarbacane->get('/campaigns/'.$this->sarbacane_id.'/recipients', array());
