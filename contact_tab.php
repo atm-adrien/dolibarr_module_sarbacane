@@ -90,7 +90,7 @@ $sarbacane = new Sarbacane('https://sarbacaneapis.com/v1', $conf->global->SARBAC
 * Put here all code to build page
 */
 
-$TCampaignIds = array();
+//$TCampaignIds = array();
 
 llxHeader('',$langs->trans("Sarbacane"));
 
@@ -225,7 +225,7 @@ if($resql) {
 			print '<td>&nbsp;</td>';
 			print "</tr>\n";
 
-			$TCampaignIds[] = $obj->sarbacane_campaignid;
+//			$TCampaignIds[] = $obj->sarbacane_campaignid;
 		}
 	}
 
@@ -244,16 +244,6 @@ else
 {
 	dol_print_error($db);
 }
-
-/*
- * TODO pour chaque campagne
- * GET https://sarbacaneapis.com/v1/reports/{campaignId}/recipients
- * vérifier que le contact est présent et récupérer ses stats
- *
- * pb le temps de lecture est inaccessible via l'API
- * le status actif si ouvert au moins une fois + unsubscribe = false sinon inactif
- *
- */
 
 /*
 

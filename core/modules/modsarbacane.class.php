@@ -318,6 +318,25 @@ class modsarbacane extends DolibarrModules
 		// $this->export_sql_end[$r] .=' WHERE f.fk_soc = s.rowid AND f.rowid = fd.fk_facture';
 		// $this->export_sql_order[$r] .=' ORDER BY s.nom';
 		// $r++;
+
+		include_once DOL_DOCUMENT_ROOT . '/cron/class/cronjob.class.php';
+		// CRON jobs
+		$this->cronjobs = array(
+			array(
+				'jobtype' => 'method',
+				'class' => 'sarbacane/class/dolsarbacane.class.php',
+				'objectname' => 'DolSarbacane',
+				'frequency' => 24,
+				'unitfrequency' => 3600,
+				'status' => Cronjob::STATUS_DISABLED,
+				'test' => true,
+				'method' => 'CRONupdateCampaignRecipientStats',
+				'comment' => $langs->trans('SarbacaneUpdateRecipientStats'),
+				'label' => $langs->trans('SarbacaneUpdateRecipientStats'),
+				'datestart' => strtotime('tomorrow 00:00:01'),
+			)
+		);
+
 	}
 
 	/**

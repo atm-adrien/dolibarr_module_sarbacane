@@ -678,7 +678,6 @@ class DolSarbacane extends CommonObject {
 								$campaignContact->statut = ($campaignContact->nb_open > 0 && empty($campaignContact->unsubscribe)) ? 1 : 0;
 
 								$ret = $campaignContact->update($user);
-								var_dump($ret, $campaignContact->error);
 							}
 
 						}
@@ -693,6 +692,18 @@ class DolSarbacane extends CommonObject {
 
     	if (empty($error)) return 1;
         else return -1;
+	}
+
+	/**
+	 * Method to be called by dolibarrCron
+	 *
+	 * @return int 0 everything OK, 1 = error
+	 */
+	public function CRONupdateCampaignRecipientStats()
+	{
+		$ret = $this->updateCampaignRecipientStats();
+		if ($ret > 0) return 0;
+		else return 1;
 	}
 
     /**
@@ -1540,7 +1551,7 @@ class DolSarbacane extends CommonObject {
             dol_syslog(get_class($this)."::sendSarbacaneCampaign ".$this->error, LOG_ERR);
             return -1;
         }
-        var_dump($ret);
+//        var_dump($ret);
         try {
             $ret = $this->sarbacane->get('/lists/'.$this->sarbacane_listid.'/contacts', array());
         }
@@ -1549,8 +1560,8 @@ class DolSarbacane extends CommonObject {
             dol_syslog(get_class($this)."::sendSarbacaneCampaign ".$this->error, LOG_ERR);
             return -1;
         }
-        var_dump($ret);
-        exit;
+//        var_dump($ret);
+//        exit;
     }
 
 }
