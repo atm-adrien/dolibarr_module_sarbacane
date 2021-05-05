@@ -238,6 +238,11 @@ if($resql) {
 	print '</div>';
 	print '</form>';
 
+	// statut moyen
+//	$campaignContact = new DolSarbacaneTargetLine($db);
+//	$campaignContact->fk_contact = $id;
+//	var_dump($campaignContact->getAverageStatus());
+
 	$db->free($resql);
 }
 else

@@ -115,6 +115,8 @@ Sent=Envoyée
 
 SarbInactiveContact=Inactif
 SarbActiveContact=Actif
+SarbNotSoActiveContact=Peu Actif
+SarbMiddleActiveContact=Neutre
 SarbNbOpen=Nombre d'ouvertures
 SarbNbClick=Nombre de clics
 SarbacaneUpdateRecipientStats=Mise à jour des statistiques campagnes

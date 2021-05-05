@@ -1793,6 +1793,106 @@ class DolSarbacaneTargetLine extends DolSarbacane {
 		}
 
 	}
+
+	/**
+	 * Delete object in database
+	 *
+	 * @param User $user      that deletes
+	 * @param int  $notrigger triggers after, 1=disable triggers
+	 * @return int <0 if KO, >0 if OK
+	 */
+	function delete($user, $notrigger = 0) {
+		global $conf, $langs;
+		$error = 0;
+
+		$this->db->begin();
+
+		if(! $error) {
+			if(! $notrigger) {
+				// Uncomment this and change MYOBJECT to your own tag if you
+				// want this action calls a trigger.
+
+				 // Call triggers
+				 include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
+				 $interface=new Interfaces($this->db);
+				 $result=$interface->run_triggers('SARBACANE_CAMPAIGN_CONTACT_DELETE',$this,$user,$langs,$conf);
+				 if ($result < 0) { $error++; $this->errors=$interface->errors; }
+				 // End call triggers
+			}
+		}
+
+		if(! $error) {
+			$sql = "DELETE FROM ".MAIN_DB_PREFIX.$this->table_element;
+			$sql .= " WHERE rowid=".$this->id;
+
+			dol_syslog(get_class($this)."::delete sql=".$sql);
+			$resql = $this->db->query($sql);
+			if(! $resql) {
+				$error++;
+				$this->errors[] = "Error ".$this->db->lasterror();
+			}
+		}
+
+		// Commit or rollback
+		if($error) {
+			foreach($this->errors as $errmsg) {
+				dol_syslog(get_class($this)."::delete ".$errmsg, LOG_ERR);
+				$this->error .= ($this->error ? ', '.$errmsg : $errmsg);
+			}
+			$this->db->rollback();
+			return -1 * $error;
+		}
+		else {
+			$this->db->commit();
+			return 1;
+		}
+	}
+
+	public function getAverageStatus()
+	{
+		global $langs;
+		$error = $nb_active = $nb_total = $average = 0;
+
+		if (empty($this->fk_contact))
+		{
+			$this->error = 'No contact id defined';
+			return -1;
+		}
+
+		$sql = "SELECT COUNT(*) as nb FROM ".MAIN_DB_PREFIX.$this->table_element." WHERE fk_contact = ".$this->fk_contact;
+		$resql = $this->db->query($sql);
+		if(! $resql) {
+			$error++;
+			$this->error = "Error ".$this->db->lasterror();
+			return -2;
+		}
+		else
+		{
+			$obj = $this->db->fetch_object($resql);
+			$nb_total = intval($obj->nb);
+		}
+
+		if (empty($nb_total)) return $langs->trans('SarbInactiveContact');
+
+		$resql = $this->db->query($sql . " AND statut = 1");
+		if(! $resql) {
+			$error++;
+			$this->error = "Error ".$this->db->lasterror();
+			return -2;
+		}
+		else
+		{
+			$obj = $this->db->fetch_object($resql);
+			$nb_active = intval($obj->nb);
+
+			if (empty($nb_active)) return $langs->trans('SarbInactiveContact');
+		}
+		$average = $nb_active / $nb_total;
+//		var_dump($nb_total, $nb_active, $average);
+		if ($average < 0.3) return $langs->trans('SarbNotSoActiveContact');
+		else if ($average < 0.6) return $langs->trans('SarbMiddleActiveContact');
+		else return $langs->trans('SarbActiveContact');
+	}
 }
 
 class DolSarbacaneActivitesLine {
