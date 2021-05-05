@@ -112,3 +112,8 @@ SarbacaneReturnError=Sarbacane a renvoyé l'erreur suivante : %s
 SarbacaneListCreated=Liste créée avec succès
 SarbacaneCampaign = Campagne Sarbacane
 Sent=Envoyée
+
+SarbInactiveContact=Inactif
+SarbActiveContact=Actif
+SarbNbOpen=Nombre d'ouvertures
+SarbNbClick=Nombre de clics

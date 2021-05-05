@@ -59,7 +59,7 @@ class modsarbacane extends DolibarrModules
 		// Module description, used if translation string 'ModuleXXXDesc' not found (where XXX is value of numeric property 'numero' of module)
 		$this->description = "Description of module sarbacane";
 		// Possible values for version are: 'development', 'experimental', 'dolibarr' or version
-		$this->version = '1.0.0';
+		$this->version = '1.0.1';
 		// Key used in llx_const table to save module status enabled/disabled (where SARBACANE is value of property name of module in uppercase)
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
 		// Where to store the module in setup page (0=common,1=interface,2=others,3=very specific)
@@ -333,11 +333,11 @@ class modsarbacane extends DolibarrModules
 		global $langs;
 		$sql = array();
 
+		if (version_compare($this->version, '1.0.1') < 0) $sql[] = "ALTER TABLE `".MAIN_DB_PREFIX."sarbacane_campaign_contact` ADD `statut` integer NOT NULL DEFAULT 0, ADD `nb_click` INT NOT NULL DEFAULT '0' AFTER `statut`, ADD `nb_open` INT NOT NULL DEFAULT '0' AFTER `nb_click`, ADD `npai` BOOLEAN NOT NULL DEFAULT FALSE AFTER `nb_open`, ADD `unsubscribe` BOOLEAN NOT NULL DEFAULT FALSE AFTER `npai`;";
+
 		define('INC_FROM_DOLIBARR', true);
 
-
 		$result=$this->_load_tables('/sarbacane/sql/');
-
 
 		return $this->_init($sql, $options);
 	}

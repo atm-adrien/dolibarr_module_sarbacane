@@ -22,5 +22,10 @@ CREATE TABLE IF NOT EXISTS llx_sarbacane_campaign_contact (
 	fk_user_author	integer	NOT NULL,
 	datec	datetime  NOT NULL,
 	fk_user_mod integer NOT NULL,
-	tms timestamp
+    tms timestamp,
+    statut integer NOT NULL DEFAULT 0,
+    nb_click integer NOT NULL DEFAULT 0,
+    nb_open integer NOT NULL DEFAULT 0,
+    npai tinyint NOT NULL DEFAULT 0,
+    unsubscribe tinyint NOT NULL DEFAULT 0
 )ENGINE=InnoDB;
