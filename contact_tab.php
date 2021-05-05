@@ -57,12 +57,18 @@ $pagenext = $page + 1;
 if (!$sortorder) $sortorder = "DESC";
 if (!$sortfield) $sortfield = "s.datec";
 
+$object = new Contact($db);
+$hookmanager->initHooks(array('sarbacaneCampaignContactlist', 'sarbacaneContactTab'));
+$extrafields = new ExtraFields($db);
+
+// fetch optionals attributes and labels
+$extrafields->fetch_name_optionals_label($object->table_element);
+
 // Access control
 //if (! $user->rights->mailing->creer || (empty($conf->global->EXTERNAL_USERS_ARE_AUTHORIZED) && $user->societe_id > 0 )) {
 //	accessforbidden();
 //}
 
-$object = new Contact($db);
 $result=$object->fetch($id);
 if ($result<0) {
 	setEventMessage($object->error,'errors');
