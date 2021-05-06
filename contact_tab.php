@@ -278,7 +278,7 @@ if($resql) {
 	}
 	else
 	{
-		print '<tr class="oddeven">';
+		print '<tr class="liste_total">';
 		// nom de campagne
 		print '<td>'.$langs->trans('Total').'</td>';
 
