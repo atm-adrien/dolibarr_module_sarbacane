@@ -34,6 +34,9 @@ $result = restrictedArea($user, 'mailing');
 
 $sortfield = GETPOST("sortfield", 'alpha');
 $sortorder = GETPOST("sortorder", 'alpha');
+$massaction = GETPOST('massaction', 'alpha');
+$toselect = GETPOST('toselect', 'array');
+$arrayofselected = is_array($toselect) ? $toselect : array();
 $limit = GETPOST('limit', 'int') ?GETPOST('limit', 'int') : $conf->liste_limit;
 $optioncss = GETPOST('optioncss', 'alpha');
 $page = GETPOSTISSET('pageplusone') ? (GETPOST('pageplusone') - 1) : GETPOST("page", 'int');
@@ -109,6 +112,33 @@ if (empty($reshook))
 	$uploaddir = $conf->mymodule->dir_output;
 	include DOL_DOCUMENT_ROOT.'/core/actions_massactions.inc.php';
 	*/
+
+	if ($massaction == 'update_campaign_stats' && !empty($toselect))
+	{
+		$sql = "SELECT sarbacane_id FROM ".MAIN_DB_PREFIX."sarbacane WHERE fk_mailing IN ('".implode(',', $toselect)."')";
+		$massresql = $db->query($sql);
+		if ($massresql)
+		{
+			$TSarbId = array();
+			while ($obj = $db->fetch_object($massresql))
+			{
+				$TSarbId[] = $obj->sarbacane_id;
+			}
+		}
+
+		if (!empty($TSarbId))
+		{
+			$sarb = new DolSarbacane($db);
+			$ret = $sarb->updateCampaignRecipientStats($TSarbId);
+			if ($ret > 0) setEventMessage($langs->trans('SarbMessageStatUpdateSuccess'), 'mesgs');
+			else
+			{
+				var_dump($ret, $sarb->errors);
+				setEventMessages($langs->trans('SarbMessageStatUpdateError'), $sarb->errors, 'errors');
+			}
+		}
+
+	}
 }
 
 
@@ -183,6 +213,12 @@ if ($resql)
 	if ($limit > 0 && $limit != $conf->liste_limit) $param .= '&limit='.urlencode($limit);
 	if ($filteremail) $param .= '&filteremail='.urlencode($filteremail);
 
+	// List of mass actions available
+	$arrayofmassactions = array(
+		'update_campaign_stats'=>$langs->trans("SarbacaneUpdateRecipientStats"),
+	);
+	$massactionbutton = $form->selectMassAction('', $arrayofmassactions);
+
 	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">';
 	if ($optioncss != '') print '<input type="hidden" name="optioncss" value="'.$optioncss.'">';
 	print '<input type="hidden" name="token" value="'.newToken().'">';
@@ -190,7 +226,7 @@ if ($resql)
 	print '<input type="hidden" name="sortfield" value="'.$sortfield.'">';
 	print '<input type="hidden" name="sortorder" value="'.$sortorder.'">';
 
-	print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, '', $num, $nbtotalofrecords, 'sarbacane@sarbacane', 0, $newcardbutton, '', $limit, 0, 0, 1);
+	print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, $massactionbutton, $num, $nbtotalofrecords, 'sarbacane@sarbacane', 0, $newcardbutton, '', $limit, 0, 0, 1);
 
 	$moreforfilter = '';
 
@@ -293,7 +329,14 @@ if ($resql)
 		}
 		print '</td>';
 
-		print '<td></td>';
+		print '<td>';
+		if ($massactionbutton || $massaction)   // If we are in select mode (massactionbutton defined) or if we have already selected and sent an action ($massaction) defined
+		{
+			$selected = 0;
+			if (in_array($obj->rowid, $arrayofselected)) $selected = 1;
+			print '<input id="cb'.$obj->rowid.'" class="flat checkforselect" type="checkbox" name="toselect[]" value="'.$obj->rowid.'"'.($selected ? ' checked="checked"' : '').'>';
+		}
+		print '</td>';
 
 		print "</tr>\n";
 		$i++;

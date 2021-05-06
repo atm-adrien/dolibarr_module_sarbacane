@@ -120,3 +120,5 @@ SarbMiddleActiveContact=Neutre
 SarbNbOpen=Nombre d'ouvertures
 SarbNbClick=Nombre de clics
 SarbacaneUpdateRecipientStats=Mise à jour des statistiques campagnes
+SarbMessageStatUpdateSuccess=Les statistiques de campagne ont été mises à jour
+SarbMessageStatUpdateError=Erreur lors de la mise à jour des statistiques de campagne
