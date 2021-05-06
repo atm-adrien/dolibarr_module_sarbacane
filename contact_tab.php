@@ -70,9 +70,9 @@ $extrafields = new ExtraFields($db);
 $extrafields->fetch_name_optionals_label($object->table_element);
 
 // Access control
-//if (! $user->rights->mailing->creer || (empty($conf->global->EXTERNAL_USERS_ARE_AUTHORIZED) && $user->societe_id > 0 )) {
-//	accessforbidden();
-//}
+if (! $user->rights->sarbacane->contact_tab_read || (empty($conf->global->EXTERNAL_USERS_ARE_AUTHORIZED) && $user->societe_id > 0 )) {
+	accessforbidden();
+}
 
 $result=$object->fetch($id);
 if ($result<0) {
