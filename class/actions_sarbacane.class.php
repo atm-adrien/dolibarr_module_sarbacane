@@ -67,28 +67,53 @@ class Actionssarbacane
 	 */
 	public function doActions($parameters, &$object, &$action, $hookmanager)
 	{
-		$error = 0; // Error counter
-		$myvalue = 'test'; // A result value
+//		$error = 0; // Error counter
+//		$myvalue = 'test'; // A result value
+//
+//		print_r($parameters);
+//		echo "action: " . $action;
+//		print_r($object);
+//
+//		if (in_array('somecontext', explode(':', $parameters['context'])))
+//		{
+//		  // do something only for the context 'somecontext'
+//		}
+//
+//		if (! $error)
+//		{
+//			$this->results = array('myreturn' => $myvalue);
+//			$this->resprints = 'A text to show';
+//			return 0; // or return 1 to replace standard code
+//		}
+//		else
+//		{
+//			$this->errors[] = 'Error message';
+//			return -1;
+//		}
+	}
 
-		print_r($parameters);
-		echo "action: " . $action;
-		print_r($object);
+	public function addMoreActionsButtons($parameters, &$object, &$action, $hookmanager)
+	{
+		global $langs;
 
-		if (in_array('somecontext', explode(':', $parameters['context'])))
-		{
-		  // do something only for the context 'somecontext'
-		}
+		$TContext = explode(':', $parameters['context']);
 
-		if (! $error)
+		if (in_array('contactcard', $TContext))
 		{
-			$this->results = array('myreturn' => $myvalue);
-			$this->resprints = 'A text to show';
-			return 0; // or return 1 to replace standard code
-		}
-		else
-		{
-			$this->errors[] = 'Error message';
-			return -1;
+			dol_include_once('sarbacane/class/dolsarbacane.class.php');
+			$recipient = new DolSarbacaneTargetLine($this->db);
+			$recipient->fk_contact = $object->id;
+
+			$fieldLabel = $langs->trans('SarbAverageStatus');
+			$status = $recipient->getAverageStatus();
+
+			?>
+			<script type="application/javascript">
+				$(document).ready(function(){
+					$('.fichehalfleft table.tableforfield').append($('<tr><td><?php echo $fieldLabel; ?></td><td><?php echo $status; ?></td></tr>'))
+				});
+			</script>
+			<?php
 		}
 	}
 }
