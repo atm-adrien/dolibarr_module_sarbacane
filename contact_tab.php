@@ -45,6 +45,11 @@ $id = GETPOST('id', 'int');
 $action = GETPOST('action', 'alpha');
 $confirm = GETPOST('confirm', 'none');
 
+$search_campaign = GETPOST('search_campaign', 'none');
+$search_status = GETPOST('search_status', 'none');
+$search_nb_open = GETPOST('search_nb_open', 'int');
+$search_nb_click = GETPOST('search_nb_click', 'int');
+
 $sortfield = GETPOST("sortfield", 'alpha');
 $sortorder = GETPOST("sortorder", 'alpha');
 $limit = GETPOST('limit', 'int') ?GETPOST('limit', 'int') : $conf->liste_limit;
@@ -88,7 +93,25 @@ $sarbacane = new Sarbacane('https://sarbacaneapis.com/v1', $conf->global->SARBAC
 *
 * Put here all code to do according to value of "action" parameter
 */
+$parameters = array();
+$reshook = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
+if ($reshook < 0) setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
 
+if (empty($reshook))
+{
+	// Purge search criteria
+	if (GETPOST('button_removefilter_x', 'alpha') || GETPOST('button_removefilter.x', 'alpha') || GETPOST('button_removefilter', 'alpha')) // All tests are required to be compatible with all browsers
+	{
+		/*foreach($object->fields as $key => $val)
+		{
+			$search[$key]='';
+		}*/
+		$search_campaign = '';
+		$search_status = '';
+		$search_nb_open = '';
+		$search_nb_click = '';
+	}
+}
 
 /*
  * VIEW
@@ -123,12 +146,17 @@ dol_fiche_end();
 
 // récupérer les campagnes dans lesquelles le contact est présent (DolSarbacane::$campaign_contact_table)
 $sql = "SELECT";
-$sql.= " m.titre, scc.sarbacane_campaignid, scc.statut, scc.nb_open, scc.nb_click";
+$sql.= " m.titre, s.fk_mailing, scc.sarbacane_campaignid, scc.statut, scc.nb_open, scc.nb_click";
 $sql.= " FROM ".MAIN_DB_PREFIX.DolSarbacane::$campaign_contact_table." as scc";
 $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."sarbacane as s ON s.sarbacane_id = scc.sarbacane_campaignid";
 $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."mailing m ON m.rowid = s.fk_mailing";
 $sql.= " WHERE scc.fk_contact = ".$id;
 // Todo ajouter les filtres
+
+if (isset($search_campaign) && !empty($search_campaign)) $sql.= " AND m.titre LIKE '%".$db->escape($search_campaign)."%'";
+if ($search_status !== '' && $search_status > -1) $sql.= " AND scc.statut = ".$search_status;
+if ($search_nb_open !== '' && $search_nb_open > -1) $sql.= " AND scc.nb_open = ".$search_nb_open;
+if ($search_nb_click !== '' && $search_nb_click > -1) $sql.= " AND scc.nb_click = ".$search_nb_click;
 
 $sql .= $db->order($sortfield, $sortorder);
 //var_dump($sql); exit;
@@ -162,6 +190,7 @@ if($resql) {
 	print '<input type="hidden" name="action" value="list">';
 	print '<input type="hidden" name="sortfield" value="'.$sortfield.'">';
 	print '<input type="hidden" name="sortorder" value="'.$sortorder.'">';
+	print '<input type="hidden" name="id" value="'.$id.'">';
 
 	$title = $langs->trans('ListOfEMailings');
 	print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, '', $num, $nbtotalofrecords, 'object_email', 0, '', '', $limit, 0, 0, 1);
@@ -173,17 +202,19 @@ if($resql) {
 	print '<tr class="liste_titre_filter">';
 	// nom de campagne
 	print '<td class="liste_titre">';
+	print '<input type="text" name="search_campaign" id="search_campaign" value="'.$search_campaign.'"/>';
 	print '</td>';
 
 	// Statut dans la campagne
 	print '<td class="liste_titre">';
+	print $form->selectArray('search_status', array($langs->trans('SarbInactiveContact'), $langs->trans('SarbActiveContact')), $search_status, 1);
 	print '</td>';
 
 	// Nombre d'ouvertures
-	print '<td class="liste_titre">&nbsp;</td>';
+	print '<td class="liste_titre"><input type="number" step="1" name="search_nb_open" id="search_nb_open" value="'.$search_nb_open.'"></td>';
 
 	// Nombre de clics
-	print '<td class="liste_titre">&nbsp;</td>';
+	print '<td class="liste_titre"><input type="number" step="1" name="search_nb_click" id="search_nb_click" value="'.$search_nb_click.'"></td>';
 
 	print '<td class="liste_titre maxwidthsearch">';
 	$searchpicto = $form->showFilterAndCheckAddButtons(0);
@@ -208,13 +239,15 @@ if($resql) {
 	print '<td class="liste_titre maxwidthsearch"></td>';
 	print "</tr>\n";
 	if($num) {
-
+		$total = array('open' => 0, 'click' => 0);
 		while($obj = $db->fetch_object($resql)) {
+			$StaticDolsarbacane = new DolSarbacane($db);
+			$StaticDolsarbacane->fk_mailing = $obj->fk_mailing;
 
 			print '<tr class="oddeven">';
 			// nom de campagne
 			print '<td>';
-			print $obj->titre;
+			print $StaticDolsarbacane->getNomUrl();
 			print '</td>';
 
 			// Statut dans la campagne
@@ -224,12 +257,16 @@ if($resql) {
 
 			// Nombre d'ouvertures
 			print '<td>'.$obj->nb_open.'</td>';
+			$total['open'] += intval($obj->nb_open);
 
 			// Nombre de clics
 			print '<td>'.$obj->nb_click.'</td>';
+			$total['click'] += intval($obj->nb_click);
 
 			print '<td>&nbsp;</td>';
 			print "</tr>\n";
+
+
 
 //			$TCampaignIds[] = $obj->sarbacane_campaignid;
 		}
@@ -238,6 +275,26 @@ if($resql) {
 	if (empty($num)) {
 		$colspan = 5;
 		print '<tr><td colspan="'.$colspan.'"><span class="opacitymedium">'.$langs->trans("NoRecordFound").'</td></tr>';
+	}
+	else
+	{
+		print '<tr class="oddeven">';
+		// nom de campagne
+		print '<td>'.$langs->trans('Total').'</td>';
+
+		// Statut moyen
+		$campaignContact = new DolSarbacaneTargetLine($db);
+		$campaignContact->fk_contact = $id;
+		$AverageStatus = $campaignContact->getAverageStatus();
+		print '<td>'.$AverageStatus.'</td>';
+		// Nombre d'ouvertures
+		print '<td>'.$total['open'].'</td>';
+
+		// Nombre de clics
+		print '<td>'.$total['click'].'</td>';
+
+		print '<td>&nbsp;</td>';
+		print "</tr>\n";
 	}
 
 	print '</table>';
