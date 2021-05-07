@@ -1016,7 +1016,12 @@ class DolSarbacane extends CommonObject {
                     foreach($TRecipient as $recipient) {
                         $fk_contact = $this->getContactDolibarrIdByMail($recipient['email']);
 
-                        if(!empty($fk_contact)) $this->upsertCampaignContact($recipient['id'], $fk_contact);
+                        if(!empty($fk_contact))
+						{
+							$this->upsertCampaignContact($recipient['id'], $fk_contact);
+							// fix list_contact pas mis à jour à la création
+							$this->upsertListContact($this->sarbacane_listid, $recipient['id'], $fk_contact);
+						}
                     }
                 }
             }
