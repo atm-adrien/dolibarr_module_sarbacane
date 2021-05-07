@@ -739,6 +739,18 @@ class DolSarbacane extends CommonObject {
 								$campaignContact->statut = ($campaignContact->nb_open > 0 && empty($campaignContact->unsubscribe)) ? 1 : 0;
 
 								$ret = $campaignContact->update($user);
+								if ($ret > 0)
+								{
+									if (!empty($campaignContact->npai))
+									{
+										$campaignContact->fetch_contact($campaignContact->fk_contact);
+										if ($campaignContact->npai == $campaignContact->contact->email)
+										{
+											$campaignContact->contact->array_options['options_sarb_npai'] = true;
+											$campaignContact->contact->insertExtraFields();
+										}
+									}
+								}
 							}
 
 						}

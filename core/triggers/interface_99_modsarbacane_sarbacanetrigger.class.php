@@ -597,4 +597,11 @@ class Interfacesarbacanetrigger extends DolibarrTriggers
 
         return 0;
     }
+
+    public function contactModify($action, $object, $user, $langs, $conf)
+	{
+		// TODO décocher sarb_npai si le contact change d'adresse mail
+		// indice : celles qui sont en npai sont dans les champs npai de llx_campaign_contact pour ce tiers
+
+	}
 }

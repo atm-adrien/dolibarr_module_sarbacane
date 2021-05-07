@@ -91,7 +91,8 @@ class modsarbacane extends DolibarrModules
 		$this->module_parts = array(
 			'hooks' => array(
 				'contactcard'
-			)
+			),
+			'triggers' => 1
 		);
 
 		// Data directories to create when module is enabled.
@@ -363,6 +364,7 @@ class modsarbacane extends DolibarrModules
 
 		$e = new ExtraFields($this->db);
 		$ret = $e->addExtraField('average_status', 'SarbAverageStatus', 'varchar', '100', '255', 'socpeople', 0, 0, '', '', 1, '', 5);
+		$ret = $e->addExtraField('sarb_npai', 'NPAI', 'boolean', '410', '', 'socpeople', 0, 0, '', '', 1, '', 1);
 
 		define('INC_FROM_DOLIBARR', true);
 
