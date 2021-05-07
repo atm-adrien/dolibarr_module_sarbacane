@@ -622,12 +622,26 @@ class DolSarbacane extends CommonObject {
 		$this->CampaignRecipientStats = array();
         $error = 0;
 
-		try {
-			$this->CampaignRecipientStats = $this->sarbacane->get('reports/'.$campaignId.'/recipients', array());
-		}
-		catch(Exception $e) {
-			$this->errors[] = $e->getMessage($campaignId);
-			$error++;
+        $sql = "SELECT COUNT(rowid) as nb_contact FROM ".MAIN_DB_PREFIX.$this::$campaign_contact_table." WHERE sarbacane_campaignid = ".$campaignId;
+        $resql = $this->db->query($sql);
+        if ($resql)
+		{
+			$obj = $this->db->fetch_object($resql);
+			$nb_contact = $obj->nb_contact;
+
+			$offset = 0;
+			while ($offset < $nb_contact && !$error)
+			{
+				try {
+					$this->CampaignRecipientStats = array_merge($this->CampaignRecipientStats, $this->sarbacane->get('reports/'.$campaignId.'/recipients?offset='.$offset, array()));					}
+				catch(Exception $e) {
+					$this->errors[] = $e->getMessage($campaignId);
+					$error++;
+				}
+
+				$offset += 1000;
+			}
+
 		}
 
 		if (empty($error)) return 1;
