@@ -38,6 +38,7 @@ class DolSarbacane extends CommonObject {
     var $sarbacane; // API Object
     var $email_lines = array();
     var $listdest_lines = array();
+    var $blacklists_lines = array();
     var $listsegment_lines = array();
     var $listcampaign_lines = array();
     var $listlist_lines = array();
@@ -89,6 +90,7 @@ class DolSarbacane extends CommonObject {
         if(isset($this->sarbacane_id)) $this->sarbacane_id = trim($this->sarbacane_id);
         if(isset($this->sarbacane_webid)) $this->sarbacane_webid = trim($this->sarbacane_webid);
         if(isset($this->sarbacane_listid)) $this->sarbacane_listid = trim($this->sarbacane_listid);
+        if(isset($this->sarbacane_blacklistid)) $this->sarbacane_blacklistid = trim($this->sarbacane_blacklistid);
         if(isset($this->sarbacane_segmentid)) $this->sarbacane_segmentid = trim($this->sarbacane_segmentid);
         if(isset($this->sarbacane_sender_name)) $this->sarbacane_sender_name = trim($this->sarbacane_sender_name);
 
@@ -103,6 +105,7 @@ class DolSarbacane extends CommonObject {
         $sql .= "sarbacane_id,";
         $sql .= "sarbacane_webid,";
         $sql .= "sarbacane_listid,";
+        $sql .= "sarbacane_blacklistid,";
         $sql .= "sarbacane_segmentid,";
         $sql .= "sarbacane_sender_name,";
         $sql .= "fk_user_author,";
@@ -114,6 +117,7 @@ class DolSarbacane extends CommonObject {
         $sql .= " ".(! isset($this->sarbacane_id) ? 'NULL' : "'".$this->sarbacane_id."'").",";
         $sql .= " ".(! isset($this->sarbacane_webid) ? 'NULL' : "'".$this->sarbacane_webid."'").",";
         $sql .= " ".(! isset($this->sarbacane_listid) ? 'NULL' : "'".$this->db->escape($this->sarbacane_listid)."'").",";
+        $sql .= " ".(! isset($this->sarbacane_blacklistid) ? 'NULL' : "'".$this->db->escape($this->sarbacane_blacklistid)."'").",";
         $sql .= " ".(! isset($this->sarbacane_segmentid) ? 'NULL' : "'".$this->db->escape($this->sarbacane_segmentid)."'").",";
         $sql .= " ".(! isset($this->sarbacane_sender_name) ? 'NULL' : "'".$this->db->escape($this->sarbacane_sender_name)."'").",";
 
@@ -179,7 +183,8 @@ class DolSarbacane extends CommonObject {
         $sql .= " t.sarbacane_id,";
         $sql .= " t.sarbacane_webid,";
         $sql .= " t.sarbacane_listid,";
-        $sql .= " t.sarbacane_segmentid,";
+		$sql .= " t.sarbacane_blacklistid,";
+		$sql .= " t.sarbacane_segmentid,";
         $sql .= " t.sarbacane_sender_name,";
         $sql .= " t.fk_user_author,";
         $sql .= " t.datec,";
@@ -202,6 +207,7 @@ class DolSarbacane extends CommonObject {
                 $this->sarbacane_id = $obj->sarbacane_id;
                 $this->sarbacane_webid = $obj->sarbacane_webid;
                 $this->sarbacane_listid = $obj->sarbacane_listid;
+                $this->sarbacane_blacklistid = $obj->sarbacane_blacklistid;
                 $this->sarbacane_segmentid = $obj->sarbacane_segmentid;
                 $this->sarbacane_sender_name = $obj->sarbacane_sender_name;
                 $this->fk_user_author = $obj->fk_user_author;
@@ -235,6 +241,7 @@ class DolSarbacane extends CommonObject {
         $sql .= " t.sarbacane_id,";
         $sql .= " t.sarbacane_webid,";
         $sql .= " t.sarbacane_listid,";
+        $sql .= " t.sarbacane_blacklistid,";
         $sql .= " t.sarbacane_segmentid,";
         $sql .= " t.sarbacane_sender_name,";
         $sql .= " t.fk_user_author,";
@@ -267,6 +274,7 @@ class DolSarbacane extends CommonObject {
                     $line->sarbacane_id = $obj->sarbacane_id;
                     $line->sarbacane_webid = $obj->sarbacane_webid;
                     $line->sarbacane_listid = $obj->sarbacane_listid;
+                    $line->sarbacane_blacklistid = $obj->sarbacane_blacklistid;
                     $line->sarbacane_segmentid = $obj->sarbacane_segmentid;
                     $line->sarbacane_sender_name = $obj->sarbacane_sender_name;
                     $line->fk_user_author = $obj->fk_user_author;
@@ -304,6 +312,7 @@ class DolSarbacane extends CommonObject {
         $sql .= " t.sarbacane_id,";
         $sql .= " t.sarbacane_webid,";
         $sql .= " t.sarbacane_listid,";
+        $sql .= " t.sarbacane_blacklistid,";
         $sql .= " t.sarbacane_segmentid,";
         $sql .= " t.sarbacane_sender_name,";
         $sql .= " t.fk_user_author,";
@@ -327,6 +336,7 @@ class DolSarbacane extends CommonObject {
                 $this->sarbacane_id = $obj->sarbacane_id;
                 $this->sarbacane_webid = $obj->sarbacane_webid;
                 $this->sarbacane_listid = $obj->sarbacane_listid;
+                $this->sarbacane_blacklistid = $obj->sarbacane_blacklistid;
                 $this->sarbacane_segmentid = $obj->sarbacane_segmentid;
                 $this->sarbacane_sender_name = $obj->sarbacane_sender_name;
                 $this->fk_user_author = $obj->fk_user_author;
@@ -361,6 +371,7 @@ class DolSarbacane extends CommonObject {
         $sql .= " t.sarbacane_id,";
         $sql .= " t.sarbacane_webid,";
         $sql .= " t.sarbacane_listid,";
+        $sql .= " t.sarbacane_blacklistid,";
         $sql .= " t.sarbacane_segmentid,";
         $sql .= " t.sarbacane_sender_name,";
         $sql .= " t.fk_user_author,";
@@ -384,6 +395,7 @@ class DolSarbacane extends CommonObject {
                 $this->sarbacane_id = $obj->sarbacane_id;
                 $this->sarbacane_webid = $obj->sarbacane_webid;
                 $this->sarbacane_listid = $obj->sarbacane_listid;
+                $this->sarbacane_blacklistid = $obj->sarbacane_blacklistid;
                 $this->sarbacane_segmentid = $obj->sarbacane_segmentid;
                 $this->sarbacane_sender_name = $obj->sarbacane_sender_name;
                 $this->fk_user_author = $obj->fk_user_author;
@@ -420,6 +432,7 @@ class DolSarbacane extends CommonObject {
         if(isset($this->sarbacane_id)) $this->sarbacane_id = trim($this->sarbacane_id);
         if(isset($this->sarbacane_webid)) $this->sarbacane_webid = trim($this->sarbacane_webid);
         if(isset($this->sarbacane_listid)) $this->sarbacane_listid = trim($this->sarbacane_listid);
+        if(isset($this->sarbacane_blacklistid)) $this->sarbacane_blacklistid = trim($this->sarbacane_blacklistid);
         if(isset($this->sarbacane_segmentid)) $this->sarbacane_segmentid = trim($this->sarbacane_segmentid);
         if(isset($this->sarbacane_sender_name)) $this->sarbacane_sender_name = trim($this->sarbacane_sender_name);
 
@@ -434,6 +447,7 @@ class DolSarbacane extends CommonObject {
         $sql .= " sarbacane_id=".(isset($this->sarbacane_id) ? "'".$this->sarbacane_id."'" : "null").",";
         $sql .= " sarbacane_webid=".(isset($this->sarbacane_webid) ? "'".$this->sarbacane_webid."'" : "null").",";
         $sql .= " sarbacane_listid=".(isset($this->sarbacane_listid) ? "'".$this->db->escape($this->sarbacane_listid)."'" : "null").",";
+        $sql .= " sarbacane_blacklistid=".(isset($this->sarbacane_blacklistid) ? "'".$this->db->escape($this->sarbacane_blacklistid)."'" : "null").",";
         $sql .= " sarbacane_segmentid=".(isset($this->sarbacane_segmentid) ? "'".$this->db->escape($this->sarbacane_segmentid)."'" : "null").",";
         $sql .= " sarbacane_sender_name=".(isset($this->sarbacane_sender_name) ? "'".$this->db->escape($this->sarbacane_sender_name)."'" : "null").",";
 
@@ -583,6 +597,38 @@ class DolSarbacane extends CommonObject {
         }
         else {
             dol_syslog(get_class($this)."::getListDestinaries ".$this->error, LOG_ERR);
+            return -1;
+        }
+    }
+
+    /**
+     * Retreive Sarbacane BlackLists
+     *
+     * @param array $filters
+     * @return int <0 if KO, >0 if OK
+     */
+    function getBlackLists($filters = array()) {
+        $error = 0;
+
+        $result = $this->getInstanceSarbacane();
+        if($result > 0) {
+            try {
+                $response = $this->sarbacane->get('blacklists', $filters);
+            }
+            catch(Exception $e) {
+                $this->error = $e->getMessage();
+                $error++;
+            }
+            if(! empty($error)) {
+                dol_syslog(get_class($this)."::getBlackLists ".$this->error, LOG_ERR);
+                return -1;
+            }
+            else $this->blacklists_lines = $response;
+
+            return 1;
+        }
+        else {
+            dol_syslog(get_class($this)."::getBlackLists ".$this->error, LOG_ERR);
             return -1;
         }
     }
@@ -1017,6 +1063,13 @@ class DolSarbacane extends CommonObject {
                 $this->sarbacane_webid = $this->sarbacane_id;
                 //Import de la liste dans la campagne
                 $this->sarbacane->post('/campaigns/'.$this->sarbacane_id.'/list', array("listId" => $this->sarbacane_listid));
+
+                // selection de la liste noire associée
+				if (!empty($this->sarbacane_blacklistid) && $this->sarbacane_blacklistid !== "DEFAULT_BLACKLIST")
+				{
+					$this->sarbacane->post('/campaigns/'.$this->sarbacane_id.'/blacklists', array("blacklistIds" => array($this->sarbacane_blacklistid)));
+				}
+
                 //Ajout du contenu html
                 $response = $this->sarbacane->get('/campaigns/'.$this->sarbacane_id, array());
                 $sendId = $response['campaign']['sends'][0];

@@ -356,7 +356,10 @@ class modsarbacane extends DolibarrModules
 		global $langs;
 		$sql = array();
 
-		if (version_compare($this->version, '1.0.1') < 0) $sql[] = "ALTER TABLE `".MAIN_DB_PREFIX."sarbacane_campaign_contact` ADD `statut` integer NOT NULL DEFAULT 0, ADD `nb_click` INT NOT NULL DEFAULT '0' AFTER `statut`, ADD `nb_open` INT NOT NULL DEFAULT '0' AFTER `nb_click`, ADD `npai` BOOLEAN NOT NULL DEFAULT FALSE AFTER `nb_open`, ADD `unsubscribe` BOOLEAN NOT NULL DEFAULT FALSE AFTER `npai`;";
+		if (version_compare($this->version, '1.0.1') < 0) {
+			$sql[] = "ALTER TABLE `".MAIN_DB_PREFIX."sarbacane_campaign_contact` ADD `statut` integer NOT NULL DEFAULT 0, ADD `nb_click` INT NOT NULL DEFAULT '0' AFTER `statut`, ADD `nb_open` INT NOT NULL DEFAULT '0' AFTER `nb_click`, ADD `npai` BOOLEAN NOT NULL DEFAULT FALSE AFTER `nb_open`, ADD `unsubscribe` BOOLEAN NOT NULL DEFAULT FALSE AFTER `npai`;";
+			$sql[] = "ALTER TABLE `".MAIN_DB_PREFIX."sarbacane` ADD `sarbacane_blacklistid` VARCHAR(200) NOT NULL DEFAULT 'DEFAULT_BLACKLIST' AFTER `sarbacane_listid`;";
+		}
 
 		$e = new ExtraFields($this->db);
 		$ret = $e->addExtraField('average_status', 'SarbAverageStatus', 'varchar', '100', '255', 'socpeople', 0, 0, '', '', 1, '', 5);

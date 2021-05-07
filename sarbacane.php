@@ -173,6 +173,7 @@ if ($action=='associateconfirm') {
 	$updateonly=GETPOST('updateonly','alpha');
 	$updatesegment=GETPOST('updatesegment','alpha');
 	$segmentid=GETPOST('segmentlist','alpha');
+	$selectblacklist=GETPOST('selectblacklist', 'alpha');
 	if(empty($newList)) {
 	    $listid=GETPOST('selectlist','alpha');
 	} else {
@@ -181,6 +182,7 @@ if ($action=='associateconfirm') {
 	$newsegmentname=GETPOST('segmentname','alpha');
 	$resetseg=GETPOST('resetseg','int');
 	$sarbacane->sarbacane_listid=$listid;
+	$sarbacane->sarbacane_blacklistid=$selectblacklist;
 
 	if (empty($sarbacane->id)) {
 		$sarbacane->fk_mailing=$id;
@@ -496,6 +498,18 @@ if ( !empty($conf->global->SARBACANE_API_KEY)) {
 		//$events[]=array('method' => 'getSegment', 'url' => dol_buildpath('/sarbacane/ajax/sarbacane.php',1), 'htmlname' => 'segmentlist','params' => array('blocksegement' => 'style'));
 		//}
 		print $formsarbacane->select_sarbacanelist('selectlist',1,$sarbacane->sarbacane_listid,0,$events);
+		print '&nbsp;&nbsp;<input type="submit" class="button" name="save" value="'.$langs->trans('Save').'" />';
+		print '</td><td>';
+		print '</td></tr>';
+
+		print '<tr class="pair"><td class="fieldrequired" width="30%">';
+		print $langs->trans('SarbacaneBlackList');
+		print '</td><td>';
+		$events=array();
+		//if ($conf->use_javascript_ajax) {
+		//$events[]=array('method' => 'getSegment', 'url' => dol_buildpath('/sarbacane/ajax/sarbacane.php',1), 'htmlname' => 'segmentlist','params' => array('blocksegement' => 'style'));
+		//}
+		print $formsarbacane->select_sarbacaneBlacklist('selectblacklist',0,$sarbacane->sarbacane_blacklistid,0,$events);
 		print '&nbsp;&nbsp;<input type="submit" class="button" name="save" value="'.$langs->trans('Save').'" />';
 		print '</td><td>';
 		print '</td></tr>';

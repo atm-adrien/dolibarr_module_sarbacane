@@ -124,3 +124,5 @@ SarbacaneUpdateRecipientStats=Mise à jour des statistiques campagnes
 SarbMessageStatUpdateSuccess=Les statistiques de campagne ont été mises à jour
 SarbMessageStatUpdateError=Erreur lors de la mise à jour des statistiques de campagne
 sarbacane_read=Voir les statistiques de campagnes d'un contact
+SarbacaneBlackList=Choisissez la liste de désinscription liée à la campagne
+SarbacaneDefaultBlacklist=Liste de désinscription par défaut
