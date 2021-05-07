@@ -735,6 +735,7 @@ class DolSarbacane extends CommonObject {
 								$campaignContact->nb_open = $campaignStat['opens'];
 								$campaignContact->nb_click = $campaignStat['clicks'];
 								$campaignContact->unsubscribe = $campaignStat['unsubscribe'];
+								if ($campaignStat['bounce'] == true) $campaignContact->npai = $campaignStat['recipient']['email'];
 								$campaignContact->statut = ($campaignContact->nb_open > 0 && empty($campaignContact->unsubscribe)) ? 1 : 0;
 
 								$ret = $campaignContact->update($user);
@@ -1668,7 +1669,7 @@ class DolSarbacaneTargetLine extends DolSarbacane {
 	public $statut = 0;
 	public $nb_click = 0;
 	public $nb_open = 0;
-	public $npai = 0;
+	public $npai = '';
 	public $unsubscribe = 0;
 
 	public $table_element = 'sarbacane_campaign_contact';
@@ -1810,7 +1811,8 @@ class DolSarbacaneTargetLine extends DolSarbacane {
 
 		if(isset($this->fk_contact)) $this->fk_contact = trim($this->fk_contact);
 		if(isset($this->sarbacane_campaignid)) $this->sarbacane_campaignid = trim($this->sarbacane_campaignid);
-		if(isset($this->sarbacane_contactcampaignid)) $this->sarbacane_id = trim($this->sarbacane_contactcampaignid);
+		if(isset($this->sarbacane_contactcampaignid)) $this->sarbacane_contactcampaignid = trim($this->sarbacane_contactcampaignid);
+		if(isset($this->npai)) $this->npai = trim($this->npai);
 		if(empty($this->unsubscribe)) $this->unsubscribe = 0;
 		$this->nb_click = intval($this->nb_click);
 		$this->nb_open = intval($this->nb_open);
@@ -1823,7 +1825,7 @@ class DolSarbacaneTargetLine extends DolSarbacane {
 		$sql.= ",statut=".$this->statut;
 		$sql.= ",nb_click=".$this->nb_click;
 		$sql.= ",nb_open=".$this->nb_open;
-		$sql.= ",npai=".$this->npai;
+		$sql.= ",npai='".$this->db->escape($this->npai)."'";
 		$sql.= ",unsubscribe=".$this->unsubscribe;
 		$sql.= " WHERE rowid=".$this->id;
 

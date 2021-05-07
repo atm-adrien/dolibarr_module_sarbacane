@@ -26,6 +26,6 @@ CREATE TABLE IF NOT EXISTS llx_sarbacane_campaign_contact (
     statut integer NOT NULL DEFAULT 0,
     nb_click integer NOT NULL DEFAULT 0,
     nb_open integer NOT NULL DEFAULT 0,
-    npai tinyint NOT NULL DEFAULT 0,
+    npai tinyint VARCHAR(255),
     unsubscribe tinyint NOT NULL DEFAULT 0
 )ENGINE=InnoDB;
