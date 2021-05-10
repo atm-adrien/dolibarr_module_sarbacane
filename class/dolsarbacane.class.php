@@ -51,6 +51,7 @@ class DolSarbacane extends CommonObject {
     var $sarbacane_id;
     var $sarbacane_webid;
     var $sarbacane_listid;
+    var $sarbacane_blacklistid;
     var $sarbacane_segmentid;
     var $sarbacane_sender_name;
     var $fk_user_author;
@@ -736,6 +737,11 @@ class DolSarbacane extends CommonObject {
 								$campaignContact->nb_click = $campaignStat['clicks'];
 								$campaignContact->unsubscribe = $campaignStat['unsubscribe'];
 								if ($campaignStat['bounce'] == true) $campaignContact->npai = $campaignStat['recipient']['email'];
+								if ($campaignStat['unsubscribe'] == true)
+								{
+									$campaignContact->unsubscribed_email = $campaignStat['recipient']['email'];
+									$campaignContact->used_blacklist = $this->sarbacane_blacklistid;
+								}
 								$campaignContact->statut = ($campaignContact->nb_open > 0 && empty($campaignContact->unsubscribe)) ? 1 : 0;
 
 								$ret = $campaignContact->update($user);
@@ -1683,6 +1689,8 @@ class DolSarbacaneTargetLine extends DolSarbacane {
 	public $nb_open = 0;
 	public $npai = '';
 	public $unsubscribe = 0;
+	public $unsubscribed_email = '';
+	public $used_blacklist = 'DEFAULT_BLACKLIST';
 
 	public $table_element = 'sarbacane_campaign_contact';
 
@@ -1777,7 +1785,7 @@ class DolSarbacaneTargetLine extends DolSarbacane {
 	 */
 	public function fetchBySarbacaneContactCampaignId($sarbacane_contactcampaignid)
 	{
-		$sql = "SELECT rowid, fk_contact, sarbacane_campaignid, sarbacane_contactcampaignid, fk_user_author, datec, fk_user_mod, tms, statut, nb_click, nb_open, npai, unsubscribe";
+		$sql = "SELECT rowid, fk_contact, sarbacane_campaignid, sarbacane_contactcampaignid, fk_user_author, datec, fk_user_mod, tms, statut, nb_click, nb_open, npai, unsubscribe, unsubscribed_email, used_blacklist";
 		$sql.= " FROM ".MAIN_DB_PREFIX.$this->table_element;
 		$sql.= " WHERE sarbacane_contactcampaignid = '".$sarbacane_contactcampaignid."'";
 
@@ -1801,6 +1809,8 @@ class DolSarbacaneTargetLine extends DolSarbacane {
 				$this->nb_open = $obj->nb_open;
 				$this->npai = $obj->npai;
 				$this->unsubscribe = $obj->unsubscribe;
+				$this->unsubscribed_email = $obj->unsubscribed_email;
+				$this->used_blacklist = $obj->used_blacklist;
 
 				$this->db->free($resql);
 			}
@@ -1826,6 +1836,8 @@ class DolSarbacaneTargetLine extends DolSarbacane {
 		if(isset($this->sarbacane_contactcampaignid)) $this->sarbacane_contactcampaignid = trim($this->sarbacane_contactcampaignid);
 		if(isset($this->npai)) $this->npai = trim($this->npai);
 		if(empty($this->unsubscribe)) $this->unsubscribe = 0;
+		if(isset($this->unsubscribed_email)) $this->unsubscribed_email = trim($this->unsubscribed_email);
+		if(isset($this->used_blacklist)) $this->used_blacklist = trim($this->used_blacklist);
 		$this->nb_click = intval($this->nb_click);
 		$this->nb_open = intval($this->nb_open);
 
@@ -1839,6 +1851,8 @@ class DolSarbacaneTargetLine extends DolSarbacane {
 		$sql.= ",nb_open=".$this->nb_open;
 		$sql.= ",npai='".$this->db->escape($this->npai)."'";
 		$sql.= ",unsubscribe=".$this->unsubscribe;
+		$sql.= ",unsubscribed_email='".$this->db->escape($this->unsubscribed_email)."'";
+		$sql.= ",used_blacklist='".$this->db->escape($this->used_blacklist)."'";
 		$sql.= " WHERE rowid=".$this->id;
 
 		$this->db->begin();
@@ -1974,7 +1988,7 @@ class DolSarbacaneTargetLine extends DolSarbacane {
 			if (empty($nb_active)) return $langs->trans('SarbInactiveContact');
 		}
 		$average = $nb_active / $nb_total;
-//		var_dump($nb_total, $nb_active, $average);
+
 		if ($average < 0.3) return $langs->trans('SarbNotSoActiveContact');
 		else if ($average < 0.6) return $langs->trans('SarbMiddleActiveContact');
 		else return $langs->trans('SarbActiveContact');

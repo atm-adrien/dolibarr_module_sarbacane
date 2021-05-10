@@ -49,6 +49,7 @@ $search_campaign = GETPOST('search_campaign', 'none');
 $search_status = GETPOST('search_status', 'none');
 $search_nb_open = GETPOST('search_nb_open', 'int');
 $search_nb_click = GETPOST('search_nb_click', 'int');
+$search_unsubscribe = GETPOST('search_unsubscribe', 'none');
 
 $sortfield = GETPOST("sortfield", 'alpha');
 $sortorder = GETPOST("sortorder", 'alpha');
@@ -110,6 +111,7 @@ if (empty($reshook))
 		$search_status = '';
 		$search_nb_open = '';
 		$search_nb_click = '';
+		$search_unsubscribe = '';
 	}
 }
 
@@ -146,7 +148,7 @@ dol_fiche_end();
 
 // récupérer les campagnes dans lesquelles le contact est présent (DolSarbacane::$campaign_contact_table)
 $sql = "SELECT";
-$sql.= " m.titre, s.fk_mailing, scc.sarbacane_campaignid, scc.statut, scc.nb_open, scc.nb_click";
+$sql.= " m.titre, s.fk_mailing, scc.sarbacane_campaignid, scc.statut, scc.nb_open, scc.nb_click, scc.unsubscribe, scc.unsubscribed_email, scc.used_blacklist";
 $sql.= " FROM ".MAIN_DB_PREFIX.DolSarbacane::$campaign_contact_table." as scc";
 $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."sarbacane as s ON s.sarbacane_id = scc.sarbacane_campaignid";
 $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."mailing m ON m.rowid = s.fk_mailing";
@@ -157,6 +159,7 @@ if (isset($search_campaign) && !empty($search_campaign)) $sql.= " AND m.titre LI
 if ($search_status !== '' && $search_status > -1) $sql.= " AND scc.statut = ".$search_status;
 if ($search_nb_open !== '' && $search_nb_open > -1) $sql.= " AND scc.nb_open = ".$search_nb_open;
 if ($search_nb_click !== '' && $search_nb_click > -1) $sql.= " AND scc.nb_click = ".$search_nb_click;
+if ($search_unsubscribe !== '' && $search_unsubscribe > -1) $sql.= " AND scc.unsubscribe = ".$search_unsubscribe;
 
 $sql .= $db->order($sortfield, $sortorder);
 //var_dump($sql); exit;
@@ -216,6 +219,11 @@ if($resql) {
 	// Nombre de clics
 	print '<td class="liste_titre"><input type="number" step="1" name="search_nb_click" id="search_nb_click" value="'.$search_nb_click.'"></td>';
 
+	// Désinscrit
+	print '<td class="liste_titre">';
+	print $form->selectArray('search_unsubscribe', array($langs->trans('No'), $langs->trans('Yes')), $search_unsubscribe, 1);
+	print '</td>';
+
 	print '<td class="liste_titre maxwidthsearch">';
 	$searchpicto = $form->showFilterAndCheckAddButtons(0);
 	print $searchpicto;
@@ -235,6 +243,9 @@ if($resql) {
 
 	// Nombre de clics
 	print_liste_field_titre($langs->trans('SarbNbClick'), $_SERVER["PHP_SELF"], "scc.nb_clic", $param, "", "", $sortfield, $sortorder);
+
+	// Désinscrit
+	print_liste_field_titre($langs->trans('SarbUnsubscribe'), $_SERVER["PHP_SELF"], "scc.unsubscribe", $param, "", "", $sortfield, $sortorder);
 
 	print '<td class="liste_titre maxwidthsearch"></td>';
 	print "</tr>\n";
@@ -261,6 +272,12 @@ if($resql) {
 
 			// Nombre de clics
 			print '<td>'.$obj->nb_click.'</td>';
+
+			// Désinscrit
+			print '<td>';
+			print (empty($obj->unsubscribe)) ? $langs->trans('No') : $langs->trans('Yes') ." (".$obj->unsubscribed_email.")";
+			print '</td>';
+
 			$total['click'] += intval($obj->nb_click);
 
 			print '<td>&nbsp;</td>';
@@ -273,7 +290,7 @@ if($resql) {
 	}
 
 	if (empty($num)) {
-		$colspan = 5;
+		$colspan = 6;
 		print '<tr><td colspan="'.$colspan.'"><span class="opacitymedium">'.$langs->trans("NoRecordFound").'</td></tr>';
 	}
 	else
@@ -292,6 +309,8 @@ if($resql) {
 
 		// Nombre de clics
 		print '<td>'.$total['click'].'</td>';
+
+		print '<td>&nbsp;</td>';
 
 		print '<td>&nbsp;</td>';
 		print "</tr>\n";
