@@ -608,7 +608,7 @@ class Interfacesarbacanetrigger extends DolibarrTriggers
 	 */
     public function contactModify($action, $object, $user, $langs, $conf)
 	{
-		// décocher sarb_npai si le contact change d'adresse mail
+		// décocher sarb_npai si le contact change d'adresse mail et que c'est pas une adresse npai
 		// indice : celles qui sont en npai sont dans les champs npai de llx_campaign_contact pour ce tiers
 		$sql = "SELECT npai FROM ".MAIN_DB_PREFIX."sarbacane_campaign_contact";
 		$sql.= " WHERE fk_contact = ".$object->id;
