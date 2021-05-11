@@ -27,5 +27,7 @@ CREATE TABLE IF NOT EXISTS llx_sarbacane_campaign_contact (
     nb_click integer NOT NULL DEFAULT 0,
     nb_open integer NOT NULL DEFAULT 0,
     npai VARCHAR(255),
-    unsubscribe tinyint NOT NULL DEFAULT 0
+    unsubscribe tinyint NOT NULL DEFAULT 0,
+    unsubscribed_email VARCHAR(255) NULL,
+    used_blacklist VARCHAR(255) NULL
 )ENGINE=InnoDB;
