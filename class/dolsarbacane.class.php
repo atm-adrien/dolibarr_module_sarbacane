@@ -669,7 +669,7 @@ class DolSarbacane extends CommonObject {
 		$this->CampaignRecipientStats = array();
         $error = 0;
 
-        $sql = "SELECT COUNT(rowid) as nb_contact FROM ".MAIN_DB_PREFIX.$this::$campaign_contact_table." WHERE sarbacane_campaignid = ".$campaignId;
+        $sql = "SELECT COUNT(rowid) as nb_contact FROM ".MAIN_DB_PREFIX.$this::$campaign_contact_table." WHERE sarbacane_campaignid = '".$this->db->escape($campaignId)."'";
         $resql = $this->db->query($sql);
         if ($resql)
 		{
