@@ -671,6 +671,7 @@ class DolSarbacane extends CommonObject {
 
         $sql = "SELECT COUNT(rowid) as nb_contact FROM ".MAIN_DB_PREFIX.$this::$campaign_contact_table." WHERE sarbacane_campaignid = '".$this->db->escape($campaignId)."'";
         $resql = $this->db->query($sql);
+
         if ($resql)
 		{
 			$obj = $this->db->fetch_object($resql);
@@ -748,6 +749,16 @@ class DolSarbacane extends CommonObject {
 			foreach ($TCampaignId as $sarbacaneCampaignId)
 			{
 				try {
+
+					//on récupère le mailing associé à la campagne sarbacane
+					$sql = "SELECT fk_mailing FROM ".MAIN_DB_PREFIX.$this->table_element." WHERE sarbacane_id = '".$sarbacaneCampaignId."'";
+					$resql = $this->db->query($sql);
+
+					if($resql){
+						$obj = $this->db->fetch_object($resql);
+						$sarbacaneCampaign_fkmailing = $obj->fk_mailing;
+					}
+
 					$res = $this->getCampaignRecipientStat($sarbacaneCampaignId);
 					$res2 = $this->getCampaignStat($sarbacaneCampaignId);
 
@@ -783,21 +794,22 @@ class DolSarbacane extends CommonObject {
 										}
 									}
 								}
+
+								if($campaignStat['success'] == true){
+									$sql = "UPDATE ".MAIN_DB_PREFIX."mailing_cibles SET statut = 1 WHERE fk_contact ='".$campaignContact->fk_contact."' AND fk_mailing ='".$sarbacaneCampaign_fkmailing."'";
+									$this->db->query($sql);
+
+									if(!$resql) {
+										$this->errors = $this->db->lastqueryerror();
+										$error++;
+									}
+								}
 							}
 
 						}
 					}
 
 					if($res2 > 0 && !empty($this->CampaignStats)){
-
-						//on récupère le mailing associé à la campagne sarbacane
-						$sql = "SELECT fk_mailing FROM ".MAIN_DB_PREFIX.$this->table_element." WHERE sarbacane_id = '".$sarbacaneCampaignId."'";
-						$resql = $this->db->query($sql);
-
-						if($resql){
-							$obj = $this->db->fetch_object($resql);
-							$sarbacaneCampaign_fkmailing = $obj->fk_mailing;
-						}
 
 						foreach($this->CampaignStats as $campaignStat){
 							$sql="UPDATE ".MAIN_DB_PREFIX."mailing SET date_envoi = '".dol_print_date($campaignStat['date'], '%Y-%m-%d %H:%M:%S')."' WHERE rowid=".$sarbacaneCampaign_fkmailing;
