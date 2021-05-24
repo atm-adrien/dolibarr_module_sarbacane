@@ -92,6 +92,7 @@ class DolSarbacane extends CommonObject {
         if(isset($this->sarbacane_webid)) $this->sarbacane_webid = trim($this->sarbacane_webid);
         if(isset($this->sarbacane_listid)) $this->sarbacane_listid = trim($this->sarbacane_listid);
         if(isset($this->sarbacane_blacklistid)) $this->sarbacane_blacklistid = trim($this->sarbacane_blacklistid);
+        if(empty($this->sarbacane_blacklistid)) $this->sarbacane_blacklistid = 'DEFAULT_BLACKLIST';
         if(isset($this->sarbacane_segmentid)) $this->sarbacane_segmentid = trim($this->sarbacane_segmentid);
         if(isset($this->sarbacane_sender_name)) $this->sarbacane_sender_name = trim($this->sarbacane_sender_name);
 
@@ -741,6 +742,9 @@ class DolSarbacane extends CommonObject {
 								{
 									$campaignContact->unsubscribed_email = $campaignStat['recipient']['email'];
 									$campaignContact->used_blacklist = $this->sarbacane_blacklistid;
+									if (empty($campaignContact->used_blacklist)){
+										$campaignContact->used_blacklist = 'DEFAULT_BLACKLIST';
+									}
 								}
 								$campaignContact->statut = ($campaignContact->nb_open > 0 && empty($campaignContact->unsubscribe)) ? 1 : 0;
 
