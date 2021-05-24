@@ -501,7 +501,7 @@ class DolSarbacane extends CommonObject {
      * @param int  $notrigger triggers after, 1=disable triggers
      * @return int <0 if KO, >0 if OK
      */
-    function delete($user, $notrigger = 0) {
+    public function delete($user, $notrigger = 0) {
         global $conf, $langs;
         $error = 0;
 
@@ -608,7 +608,7 @@ class DolSarbacane extends CommonObject {
      * @param array $filters
      * @return int <0 if KO, >0 if OK
      */
-    function getBlackLists($filters = array()) {
+    public function getBlackLists($filters = array()) {
         $error = 0;
 
         $result = $this->getInstanceSarbacane();
@@ -663,7 +663,7 @@ class DolSarbacane extends CommonObject {
 	 * @param string $campaignId sarbacane campaign ID
      * @return int <0 if KO, >0 if OK
      */
-    function getCampaignRecipientStat($campaignId) {
+    public function getCampaignRecipientStat($campaignId) {
 
         $this->getInstanceSarbacane();
 		$this->CampaignRecipientStats = array();
@@ -1825,6 +1825,13 @@ class DolSarbacaneTargetLine extends DolSarbacane {
 		}
 	}
 
+	/**
+	 * Update db for line
+	 * @param int $user
+	 * @param int $notrigger
+	 * @return float|int
+	 * @throws Exception
+	 */
 	public function update($user = 0, $notrigger = 0)
 	{
 		global $conf, $langs;

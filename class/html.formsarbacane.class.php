@@ -112,6 +112,14 @@ class FormSarbacane
 		return $out;
 	}
 
+	/**
+	 * return html select to select blacklists
+	 * @param string $htmlname
+	 * @param int $showempty
+	 * @param string $selected
+	 * @return int|string
+	 * @throws Exception
+	 */
 	public function select_sarbacaneBlacklist($htmlname='selectblacklist',$showempty=0,$selected='')
 	{
 		global $langs;

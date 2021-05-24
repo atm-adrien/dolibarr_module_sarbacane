@@ -632,5 +632,7 @@ class Interfacesarbacanetrigger extends DolibarrTriggers
 				$object->insertExtraFields();
 			}
 		}
+
+		return 0;
 	}
 }
