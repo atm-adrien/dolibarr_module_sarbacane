@@ -59,7 +59,7 @@ class modsarbacane extends DolibarrModules
 		// Module description, used if translation string 'ModuleXXXDesc' not found (where XXX is value of numeric property 'numero' of module)
 		$this->description = "Description of module sarbacane";
 		// Possible values for version are: 'development', 'experimental', 'dolibarr' or version
-		$this->version = '1.0.0';
+		$this->version = '1.0.1';
 		// Key used in llx_const table to save module status enabled/disabled (where SARBACANE is value of property name of module in uppercase)
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
 		// Where to store the module in setup page (0=common,1=interface,2=others,3=very specific)
@@ -88,7 +88,12 @@ class modsarbacane extends DolibarrModules
 		//							'dir' => array('output' => 'othermodulename'),      // To force the default directories names
 		//							'workflow' => array('WORKFLOW_MODULE1_YOURACTIONTYPE_MODULE2'=>array('enabled'=>'! empty($conf->module1->enabled) && ! empty($conf->module2->enabled)', 'picto'=>'yourpicto@sarbacane')) // Set here all workflow context managed by module
 		//                        );
-		$this->module_parts = array();
+		$this->module_parts = array(
+			'hooks' => array(
+				'contactcard'
+			),
+			'triggers' => 1
+		);
 
 		// Data directories to create when module is enabled.
 		// Example: this->dirs = array("/sarbacane/temp");
@@ -140,7 +145,9 @@ class modsarbacane extends DolibarrModules
 		// 'thirdparty'       to add a tab in third party view
 		// 'user'             to add a tab in user view
         $this->tabs = array(
-                'emailing:+tabSarbacaneSending:SarbacaneSending:sarbacane@sarbacane:$user->rights->mailing->creer:/sarbacane/sarbacane.php?id=__ID__');
+                'emailing:+tabSarbacaneSending:SarbacaneSending:sarbacane@sarbacane:$user->rights->mailing->creer:/sarbacane/sarbacane.php?id=__ID__'
+                ,'contact:+tabSarbacaneSending:SarbacaneSending:sarbacane@sarbacane:$user->rights->mailing->creer:/sarbacane/contact_tab.php?id=__ID__'
+		);
 
         // Dictionaries
 	    if (! isset($conf->sarbacane->enabled))
@@ -183,14 +190,14 @@ class modsarbacane extends DolibarrModules
 		// $this->rights[$r][4] = 'level1';				// In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
 		// $this->rights[$r][5] = 'level2';				// In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
 		// $r++;
-/*
+
 		$this->rights[$r][0] = $this->numero . $r;	// Permission id (must not be already used)
 		$this->rights[$r][1] = 'sarbacane_read';	// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
-		$this->rights[$r][4] = 'read';				// In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
+		$this->rights[$r][4] = 'contact_tab_read';				// In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
 		$this->rights[$r][5] = '';				// In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
 		$r++;
-
+/*
 		$this->rights[$r][0] = $this->numero . $r;	// Permission id (must not be already used)
 		$this->rights[$r][1] = 'sarbacane_write';	// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
@@ -316,6 +323,25 @@ class modsarbacane extends DolibarrModules
 		// $this->export_sql_end[$r] .=' WHERE f.fk_soc = s.rowid AND f.rowid = fd.fk_facture';
 		// $this->export_sql_order[$r] .=' ORDER BY s.nom';
 		// $r++;
+
+		include_once DOL_DOCUMENT_ROOT . '/cron/class/cronjob.class.php';
+		// CRON jobs
+		$this->cronjobs = array(
+			array(
+				'jobtype' => 'method',
+				'class' => 'sarbacane/class/dolsarbacane.class.php',
+				'objectname' => 'DolSarbacane',
+				'frequency' => 24,
+				'unitfrequency' => 3600,
+				'status' => Cronjob::STATUS_DISABLED,
+				'test' => true,
+				'method' => 'CRONupdateCampaignRecipientStats',
+				'comment' => $langs->trans('SarbacaneUpdateRecipientStats'),
+				'label' => $langs->trans('SarbacaneUpdateRecipientStats'),
+				'datestart' => strtotime('tomorrow 00:00:01'),
+			)
+		);
+
 	}
 
 	/**
@@ -331,11 +357,18 @@ class modsarbacane extends DolibarrModules
 		global $langs;
 		$sql = array();
 
+		if (version_compare($this->version, '1.0.1') < 0) {
+			$sql[] = "ALTER TABLE `".MAIN_DB_PREFIX."sarbacane_campaign_contact` ADD `statut` integer NOT NULL DEFAULT 0, ADD `nb_click` INT NOT NULL DEFAULT '0' AFTER `statut`, ADD `nb_open` INT NOT NULL DEFAULT '0' AFTER `nb_click`, ADD `npai` VARCHAR(255) AFTER `nb_open`, ADD `unsubscribe` BOOLEAN NOT NULL DEFAULT FALSE AFTER `npai`, ADD `unsubscribed_email` VARCHAR(255) NULL AFTER `unsubscribe`, ADD `used_blacklist` VARCHAR(255) NULL AFTER `unsubscribed_email`;";
+			$sql[] = "ALTER TABLE `".MAIN_DB_PREFIX."sarbacane` ADD `sarbacane_blacklistid` VARCHAR(200) NOT NULL DEFAULT 'DEFAULT_BLACKLIST' AFTER `sarbacane_listid`;";
+		}
+
+		$e = new ExtraFields($this->db);
+		$ret = $e->addExtraField('average_status', 'SarbAverageStatus', 'varchar', '100', '255', 'socpeople', 0, 0, '', '', 1, '', 5);
+		$ret = $e->addExtraField('sarb_npai', 'NPAI', 'boolean', '410', '', 'socpeople', 0, 0, '', '', 1, '', 1);
+
 		define('INC_FROM_DOLIBARR', true);
 
-
 		$result=$this->_load_tables('/sarbacane/sql/');
-
 
 		return $this->_init($sql, $options);
 	}

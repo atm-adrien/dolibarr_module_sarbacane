@@ -1,6 +1,6 @@
 <?php
 /* <Sarbacane connector>
- * Copyright (C) 2013 Florian Henry florian.henry@open-concept.pro
+ * Copyright (C) 2021 Quentin Vial-Gouteyron quentin.vial-gouteyron@atm-consulting.fr
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -112,6 +112,70 @@ class FormSarbacane
 		return $out;
 	}
 
-	
+	/**
+	 * return html select to select blacklists
+	 * @param string $htmlname
+	 * @param int $showempty
+	 * @param string $selected
+	 * @return int|string
+	 * @throws Exception
+	 */
+	public function select_sarbacaneBlacklist($htmlname='selectblacklist',$showempty=0,$selected='')
+	{
+		global $langs;
+		$error=0;
+		$out = '';
+		$disabled = '';
+
+		$sarbacane = new DolSarbacane($this->db);
+		$result = $sarbacane->getBlackLists();
+
+		if($result < 0) {
+			$this->error = $sarbacane->errors;
+			dol_syslog(get_class($this)."::select_sarbacanelist Error : ".$this->error, LOG_ERR);
+			return -1;
+		}
+
+		if (is_array($sarbacane->blacklists_lines) && count($sarbacane->blacklists_lines) == 2)
+		{
+			$selected = 'DEFAULT_BLACKLIST';
+			$disabled = 'disabled';
+		}
+		if (empty($selected)) $selected = 'DEFAULT_BLACKLIST';
+
+		$out .= '<select class="flat" name="'.$htmlname.'" id="'.$htmlname.'" '.$disabled.'>';
+
+		if(! empty($showempty)) {
+			if(empty($selected)) {
+				$out .= '<option value="" selected="selected">&nbsp;</option>';
+			}
+			else {
+				$out .= '<option value="">&nbsp;</option>';
+			}
+		}
+
+		$out .= '<option value="DEFAULT_BLACKLIST" selected="selected">'.$langs->trans('SarbacaneDefaultBlacklist').'</option>';
+
+		if(is_array($sarbacane->blacklists_lines) && count($sarbacane->blacklists_lines) > 0) {
+			foreach($sarbacane->blacklists_lines as $line) {
+				if ($line['id'] == 'DEFAULT_BOUNCELIST' || $line['id'] == 'DEFAULT_BLACKLIST') continue;
+				if($selected == $line['id']) {
+					$out .= '<option value="'.$line['id'].'" selected="selected">';
+				}
+				else {
+					$out .= '<option value="'.$line['id'].'">';
+				}
+
+				$name = $line['name'];
+
+				$out .= $name;
+				$out .= '</option>';
+			}
+		}
+
+		$out .= '</select>';
+
+		return $out;
+	}
 
 }

@@ -1,5 +1,5 @@
 -- <MailChimp connector>
--- Copyright (C) 2013 Florian Henry florian.henry@open-concept.pro
+-- Copyright (C) 2021 Quentin Vial-Gouteyron quentin.vial-gouteyron@atm-consulting.fr
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -22,5 +22,12 @@ CREATE TABLE IF NOT EXISTS llx_sarbacane_campaign_contact (
 	fk_user_author	integer	NOT NULL,
 	datec	datetime  NOT NULL,
 	fk_user_mod integer NOT NULL,
-	tms timestamp
+    tms timestamp,
+    statut integer NOT NULL DEFAULT 0,
+    nb_click integer NOT NULL DEFAULT 0,
+    nb_open integer NOT NULL DEFAULT 0,
+    npai VARCHAR(255),
+    unsubscribe tinyint NOT NULL DEFAULT 0,
+    unsubscribed_email VARCHAR(255) NULL,
+    used_blacklist VARCHAR(255) NULL
 )ENGINE=InnoDB;

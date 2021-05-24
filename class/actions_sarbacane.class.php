@@ -67,28 +67,21 @@ class Actionssarbacane
 	 */
 	public function doActions($parameters, &$object, &$action, $hookmanager)
 	{
-		$error = 0; // Error counter
-		$myvalue = 'test'; // A result value
+		global $langs;
 
-		print_r($parameters);
-		echo "action: " . $action;
-		print_r($object);
+		$TContext = explode(':', $parameters['context']);
 
-		if (in_array('somecontext', explode(':', $parameters['context'])))
+		if (in_array('contactcard', $TContext))
 		{
-		  // do something only for the context 'somecontext'
-		}
+			dol_include_once('sarbacane/class/dolsarbacane.class.php');
+			$recipient = new DolSarbacaneTargetLine($this->db);
+			$recipient->fk_contact = $object->id;
 
-		if (! $error)
-		{
-			$this->results = array('myreturn' => $myvalue);
-			$this->resprints = 'A text to show';
-			return 0; // or return 1 to replace standard code
-		}
-		else
-		{
-			$this->errors[] = 'Error message';
-			return -1;
+			$status = $recipient->getAverageStatus();
+
+			$object->array_options['options_average_status'] = $status;
+			$object->insertExtraFields();
 		}
 	}
+
 }

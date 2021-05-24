@@ -597,4 +597,42 @@ class Interfacesarbacanetrigger extends DolibarrTriggers
 
         return 0;
     }
+
+	/**
+	 * @param string $action
+	 * @param Contact $object
+	 * @param User $user
+	 * @param Translate $langs
+	 * @param $conf
+	 * @return int
+	 */
+    public function contactModify($action, $object, $user, $langs, $conf)
+	{
+		// décocher sarb_npai si le contact change d'adresse mail et que c'est pas une adresse npai
+		// indice : celles qui sont en npai sont dans les champs npai de llx_campaign_contact pour ce tiers
+		$sql = "SELECT npai FROM ".MAIN_DB_PREFIX."sarbacane_campaign_contact";
+		$sql.= " WHERE fk_contact = ".$object->id;
+		$sql.= " AND npai <> ''";
+
+		$TNpai_mail = array();
+
+		$resql = $this->db->query($sql);
+		if ($resql)
+		{
+			$num = $this->db->num_rows($resql);
+			if (empty($num)) return 0;
+
+			while ($obj = $this->db->fetch_object($resql)) $TNpai_mail[] = $obj->npai;
+
+			if (!in_array($object->email, $TNpai_mail))
+			{
+				if (empty($object->array_options)) $object->fetch_optionnals();
+
+				$object->array_options['options_sarb_npai'] = 0;
+				$object->insertExtraFields();
+			}
+		}
+
+		return 0;
+	}
 }

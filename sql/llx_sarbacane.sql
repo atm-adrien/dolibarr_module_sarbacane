@@ -1,5 +1,5 @@
 -- <MailChimp connector>
--- Copyright (C) 2013 Florian Henry florian.henry@open-concept.pro
+-- Copyright (C) 2021 Quentin Vial-Gouteyron quentin.vial-gouteyron@atm-consulting.fr
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS llx_sarbacane (
 	sarbacane_id varchar(200),
 	sarbacane_webid varchar(200),
 	sarbacane_listid varchar(200),
+    sarbacane_blacklistid VARCHAR(200) NOT NULL DEFAULT 'DEFAULT_BLACKLIST',
 	sarbacane_segmentid varchar(200),
 	sarbacane_sender_name varchar(100),
 	fk_user_author	integer	NOT NULL,

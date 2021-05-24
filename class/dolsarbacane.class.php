@@ -38,6 +38,7 @@ class DolSarbacane extends CommonObject {
     var $sarbacane; // API Object
     var $email_lines = array();
     var $listdest_lines = array();
+    var $blacklists_lines = array();
     var $listsegment_lines = array();
     var $listcampaign_lines = array();
     var $listlist_lines = array();
@@ -50,6 +51,7 @@ class DolSarbacane extends CommonObject {
     var $sarbacane_id;
     var $sarbacane_webid;
     var $sarbacane_listid;
+    var $sarbacane_blacklistid;
     var $sarbacane_segmentid;
     var $sarbacane_sender_name;
     var $fk_user_author;
@@ -89,6 +91,7 @@ class DolSarbacane extends CommonObject {
         if(isset($this->sarbacane_id)) $this->sarbacane_id = trim($this->sarbacane_id);
         if(isset($this->sarbacane_webid)) $this->sarbacane_webid = trim($this->sarbacane_webid);
         if(isset($this->sarbacane_listid)) $this->sarbacane_listid = trim($this->sarbacane_listid);
+        if(isset($this->sarbacane_blacklistid)) $this->sarbacane_blacklistid = trim($this->sarbacane_blacklistid);
         if(isset($this->sarbacane_segmentid)) $this->sarbacane_segmentid = trim($this->sarbacane_segmentid);
         if(isset($this->sarbacane_sender_name)) $this->sarbacane_sender_name = trim($this->sarbacane_sender_name);
 
@@ -103,6 +106,7 @@ class DolSarbacane extends CommonObject {
         $sql .= "sarbacane_id,";
         $sql .= "sarbacane_webid,";
         $sql .= "sarbacane_listid,";
+        $sql .= "sarbacane_blacklistid,";
         $sql .= "sarbacane_segmentid,";
         $sql .= "sarbacane_sender_name,";
         $sql .= "fk_user_author,";
@@ -114,6 +118,7 @@ class DolSarbacane extends CommonObject {
         $sql .= " ".(! isset($this->sarbacane_id) ? 'NULL' : "'".$this->sarbacane_id."'").",";
         $sql .= " ".(! isset($this->sarbacane_webid) ? 'NULL' : "'".$this->sarbacane_webid."'").",";
         $sql .= " ".(! isset($this->sarbacane_listid) ? 'NULL' : "'".$this->db->escape($this->sarbacane_listid)."'").",";
+        $sql .= " ".(! isset($this->sarbacane_blacklistid) ? 'NULL' : "'".$this->db->escape($this->sarbacane_blacklistid)."'").",";
         $sql .= " ".(! isset($this->sarbacane_segmentid) ? 'NULL' : "'".$this->db->escape($this->sarbacane_segmentid)."'").",";
         $sql .= " ".(! isset($this->sarbacane_sender_name) ? 'NULL' : "'".$this->db->escape($this->sarbacane_sender_name)."'").",";
 
@@ -179,7 +184,8 @@ class DolSarbacane extends CommonObject {
         $sql .= " t.sarbacane_id,";
         $sql .= " t.sarbacane_webid,";
         $sql .= " t.sarbacane_listid,";
-        $sql .= " t.sarbacane_segmentid,";
+		$sql .= " t.sarbacane_blacklistid,";
+		$sql .= " t.sarbacane_segmentid,";
         $sql .= " t.sarbacane_sender_name,";
         $sql .= " t.fk_user_author,";
         $sql .= " t.datec,";
@@ -202,6 +208,7 @@ class DolSarbacane extends CommonObject {
                 $this->sarbacane_id = $obj->sarbacane_id;
                 $this->sarbacane_webid = $obj->sarbacane_webid;
                 $this->sarbacane_listid = $obj->sarbacane_listid;
+                $this->sarbacane_blacklistid = $obj->sarbacane_blacklistid;
                 $this->sarbacane_segmentid = $obj->sarbacane_segmentid;
                 $this->sarbacane_sender_name = $obj->sarbacane_sender_name;
                 $this->fk_user_author = $obj->fk_user_author;
@@ -235,6 +242,7 @@ class DolSarbacane extends CommonObject {
         $sql .= " t.sarbacane_id,";
         $sql .= " t.sarbacane_webid,";
         $sql .= " t.sarbacane_listid,";
+        $sql .= " t.sarbacane_blacklistid,";
         $sql .= " t.sarbacane_segmentid,";
         $sql .= " t.sarbacane_sender_name,";
         $sql .= " t.fk_user_author,";
@@ -267,6 +275,7 @@ class DolSarbacane extends CommonObject {
                     $line->sarbacane_id = $obj->sarbacane_id;
                     $line->sarbacane_webid = $obj->sarbacane_webid;
                     $line->sarbacane_listid = $obj->sarbacane_listid;
+                    $line->sarbacane_blacklistid = $obj->sarbacane_blacklistid;
                     $line->sarbacane_segmentid = $obj->sarbacane_segmentid;
                     $line->sarbacane_sender_name = $obj->sarbacane_sender_name;
                     $line->fk_user_author = $obj->fk_user_author;
@@ -304,6 +313,7 @@ class DolSarbacane extends CommonObject {
         $sql .= " t.sarbacane_id,";
         $sql .= " t.sarbacane_webid,";
         $sql .= " t.sarbacane_listid,";
+        $sql .= " t.sarbacane_blacklistid,";
         $sql .= " t.sarbacane_segmentid,";
         $sql .= " t.sarbacane_sender_name,";
         $sql .= " t.fk_user_author,";
@@ -327,6 +337,7 @@ class DolSarbacane extends CommonObject {
                 $this->sarbacane_id = $obj->sarbacane_id;
                 $this->sarbacane_webid = $obj->sarbacane_webid;
                 $this->sarbacane_listid = $obj->sarbacane_listid;
+                $this->sarbacane_blacklistid = $obj->sarbacane_blacklistid;
                 $this->sarbacane_segmentid = $obj->sarbacane_segmentid;
                 $this->sarbacane_sender_name = $obj->sarbacane_sender_name;
                 $this->fk_user_author = $obj->fk_user_author;
@@ -361,6 +372,7 @@ class DolSarbacane extends CommonObject {
         $sql .= " t.sarbacane_id,";
         $sql .= " t.sarbacane_webid,";
         $sql .= " t.sarbacane_listid,";
+        $sql .= " t.sarbacane_blacklistid,";
         $sql .= " t.sarbacane_segmentid,";
         $sql .= " t.sarbacane_sender_name,";
         $sql .= " t.fk_user_author,";
@@ -384,6 +396,7 @@ class DolSarbacane extends CommonObject {
                 $this->sarbacane_id = $obj->sarbacane_id;
                 $this->sarbacane_webid = $obj->sarbacane_webid;
                 $this->sarbacane_listid = $obj->sarbacane_listid;
+                $this->sarbacane_blacklistid = $obj->sarbacane_blacklistid;
                 $this->sarbacane_segmentid = $obj->sarbacane_segmentid;
                 $this->sarbacane_sender_name = $obj->sarbacane_sender_name;
                 $this->fk_user_author = $obj->fk_user_author;
@@ -420,6 +433,7 @@ class DolSarbacane extends CommonObject {
         if(isset($this->sarbacane_id)) $this->sarbacane_id = trim($this->sarbacane_id);
         if(isset($this->sarbacane_webid)) $this->sarbacane_webid = trim($this->sarbacane_webid);
         if(isset($this->sarbacane_listid)) $this->sarbacane_listid = trim($this->sarbacane_listid);
+        if(isset($this->sarbacane_blacklistid)) $this->sarbacane_blacklistid = trim($this->sarbacane_blacklistid);
         if(isset($this->sarbacane_segmentid)) $this->sarbacane_segmentid = trim($this->sarbacane_segmentid);
         if(isset($this->sarbacane_sender_name)) $this->sarbacane_sender_name = trim($this->sarbacane_sender_name);
 
@@ -434,6 +448,7 @@ class DolSarbacane extends CommonObject {
         $sql .= " sarbacane_id=".(isset($this->sarbacane_id) ? "'".$this->sarbacane_id."'" : "null").",";
         $sql .= " sarbacane_webid=".(isset($this->sarbacane_webid) ? "'".$this->sarbacane_webid."'" : "null").",";
         $sql .= " sarbacane_listid=".(isset($this->sarbacane_listid) ? "'".$this->db->escape($this->sarbacane_listid)."'" : "null").",";
+        $sql .= " sarbacane_blacklistid=".(isset($this->sarbacane_blacklistid) ? "'".$this->db->escape($this->sarbacane_blacklistid)."'" : "null").",";
         $sql .= " sarbacane_segmentid=".(isset($this->sarbacane_segmentid) ? "'".$this->db->escape($this->sarbacane_segmentid)."'" : "null").",";
         $sql .= " sarbacane_sender_name=".(isset($this->sarbacane_sender_name) ? "'".$this->db->escape($this->sarbacane_sender_name)."'" : "null").",";
 
@@ -486,7 +501,7 @@ class DolSarbacane extends CommonObject {
      * @param int  $notrigger triggers after, 1=disable triggers
      * @return int <0 if KO, >0 if OK
      */
-    function delete($user, $notrigger = 0) {
+    public function delete($user, $notrigger = 0) {
         global $conf, $langs;
         $error = 0;
 
@@ -588,6 +603,38 @@ class DolSarbacane extends CommonObject {
     }
 
     /**
+     * Retreive Sarbacane BlackLists
+     *
+     * @param array $filters
+     * @return int <0 if KO, >0 if OK
+     */
+    public function getBlackLists($filters = array()) {
+        $error = 0;
+
+        $result = $this->getInstanceSarbacane();
+        if($result > 0) {
+            try {
+                $response = $this->sarbacane->get('blacklists', $filters);
+            }
+            catch(Exception $e) {
+                $this->error = $e->getMessage();
+                $error++;
+            }
+            if(! empty($error)) {
+                dol_syslog(get_class($this)."::getBlackLists ".$this->error, LOG_ERR);
+                return -1;
+            }
+            else $this->blacklists_lines = $response;
+
+            return 1;
+        }
+        else {
+            dol_syslog(get_class($this)."::getBlackLists ".$this->error, LOG_ERR);
+            return -1;
+        }
+    }
+
+    /**
      * Retraive email from sarbacane List
      *
      * @return int <0 if KO, >0 if OK
@@ -609,6 +656,134 @@ class DolSarbacane extends CommonObject {
 
         return $emailsegment;
     }
+
+    /**
+     * Retreive stats for sarbacane campaign
+     *
+	 * @param string $campaignId sarbacane campaign ID
+     * @return int <0 if KO, >0 if OK
+     */
+    public function getCampaignRecipientStat($campaignId) {
+
+        $this->getInstanceSarbacane();
+		$this->CampaignRecipientStats = array();
+        $error = 0;
+
+        $sql = "SELECT COUNT(rowid) as nb_contact FROM ".MAIN_DB_PREFIX.$this::$campaign_contact_table." WHERE sarbacane_campaignid = '".$this->db->escape($campaignId)."'";
+        $resql = $this->db->query($sql);
+        if ($resql)
+		{
+			$obj = $this->db->fetch_object($resql);
+			$nb_contact = $obj->nb_contact;
+
+			$offset = 0;
+			while ($offset < $nb_contact && !$error)
+			{
+				try {
+					$this->CampaignRecipientStats = array_merge($this->CampaignRecipientStats, $this->sarbacane->get('reports/'.$campaignId.'/recipients?offset='.$offset, array()));					}
+				catch(Exception $e) {
+					$this->errors[] = $e->getMessage($campaignId);
+					$error++;
+				}
+
+				$offset += 1000;
+			}
+
+		}
+
+		if (empty($error)) return 1;
+        else return -1;
+    }
+
+	/**
+	 * update stats for sarbacane campaigns recipients
+	 *
+	 * @param array $TCampaignId array of sarbacane campaign IDs
+	 * @return int <0 if KO, >0 if OK
+	 */
+    public function updateCampaignRecipientStats($TCampaignId = array()) {
+
+    	global $user;
+
+    	$error = 0;
+
+    	if (empty($TCampaignId))
+		{
+			$sql = "SELECT sarbacane_id FROM ".MAIN_DB_PREFIX.$this->table_element;
+			$resql = $this->db->query($sql);
+			if ($resql)
+			{
+				while ($obj = $this->db->fetch_object($resql)) $TCampaignId[] = $obj->sarbacane_id;
+
+				$this->db->free($resql);
+			}
+		}
+
+		if (!empty($TCampaignId))
+		{
+			foreach ($TCampaignId as $sarbacaneCampaignId)
+			{
+				try {
+					$res = $this->getCampaignRecipientStat($sarbacaneCampaignId);
+					if ($res > 0 && !empty($this->CampaignRecipientStats))
+					{
+						foreach ($this->CampaignRecipientStats as $campaignStat)
+						{
+							$campaignContact = new DolSarbacaneTargetLine($this->db);
+							$ret = $campaignContact->fetchBySarbacaneContactCampaignId($campaignStat['recipient']['fields']['CONTACT_ID']);
+							if ($ret > 0)
+							{
+								$campaignContact->nb_open = $campaignStat['opens'];
+								$campaignContact->nb_click = $campaignStat['clicks'];
+								$campaignContact->unsubscribe = $campaignStat['unsubscribe'];
+								if ($campaignStat['bounce'] == true) $campaignContact->npai = $campaignStat['recipient']['email'];
+								if ($campaignStat['unsubscribe'] == true)
+								{
+									$campaignContact->unsubscribed_email = $campaignStat['recipient']['email'];
+									$campaignContact->used_blacklist = $this->sarbacane_blacklistid;
+								}
+								$campaignContact->statut = ($campaignContact->nb_open > 0 && empty($campaignContact->unsubscribe)) ? 1 : 0;
+
+								$ret = $campaignContact->update($user);
+								if ($ret > 0)
+								{
+									if (!empty($campaignContact->npai))
+									{
+										$campaignContact->fetch_contact($campaignContact->fk_contact);
+										if ($campaignContact->npai == $campaignContact->contact->email)
+										{
+											$campaignContact->contact->array_options['options_sarb_npai'] = true;
+											$campaignContact->contact->insertExtraFields();
+										}
+									}
+								}
+							}
+
+						}
+					}
+				}
+				catch(Exception $e) {
+					$this->errors[] = $e->getMessage($sarbacaneCampaignId);
+					$error++;
+				}
+			}
+		}
+
+    	if (empty($error)) return 1;
+        else return -1;
+	}
+
+	/**
+	 * Method to be called by dolibarrCron
+	 *
+	 * @return int 0 everything OK, 1 = error
+	 */
+	public function CRONupdateCampaignRecipientStats()
+	{
+		$ret = $this->updateCampaignRecipientStats();
+		if ($ret > 0) return 0;
+		else return 1;
+	}
 
     /**
      * Check if sender mail is already a validated sender
@@ -907,10 +1082,17 @@ class DolSarbacane extends CommonObject {
                 $this->sarbacane_webid = $this->sarbacane_id;
                 //Import de la liste dans la campagne
                 $this->sarbacane->post('/campaigns/'.$this->sarbacane_id.'/list', array("listId" => $this->sarbacane_listid));
+
+                // selection de la liste noire associée
+				if (!empty($this->sarbacane_blacklistid) && $this->sarbacane_blacklistid !== "DEFAULT_BLACKLIST")
+				{
+					$this->sarbacane->post('/campaigns/'.$this->sarbacane_id.'/blacklists', array("blacklistIds" => array($this->sarbacane_blacklistid)));
+				}
+
                 //Ajout du contenu html
                 $response = $this->sarbacane->get('/campaigns/'.$this->sarbacane_id, array());
                 $sendId = $response['campaign']['sends'][0];
-                $this->sarbacane->post('/campaigns/'.$this->sarbacane_id.'/send/'.$sendId.'/content', array("html" => $this->currentmailing->body));
+                $this->sarbacane->post('/campaigns/'.$this->sarbacane_id.'/send/'.$sendId.'/content', array("html" => $this->currentmailing->body.'<br><a href="{{unsubscribe}}">D&eacute;sinscription</a>'));
 
                 //Liaison campagne contact id & contact dolibarr
                 $TRecipient = $this->sarbacane->get('/campaigns/'.$this->sarbacane_id.'/recipients', array());
@@ -920,7 +1102,12 @@ class DolSarbacane extends CommonObject {
                     foreach($TRecipient as $recipient) {
                         $fk_contact = $this->getContactDolibarrIdByMail($recipient['email']);
 
-                        if(!empty($fk_contact)) $this->upsertCampaignContact($recipient['id'], $fk_contact);
+                        if(!empty($fk_contact))
+						{
+							$this->upsertCampaignContact($recipient['id'], $fk_contact);
+							// fix list_contact pas mis à jour à la création
+							$this->upsertListContact($this->sarbacane_listid, $recipient['id'], $fk_contact);
+						}
                     }
                 }
             }
@@ -1455,7 +1642,7 @@ class DolSarbacane extends CommonObject {
             dol_syslog(get_class($this)."::sendSarbacaneCampaign ".$this->error, LOG_ERR);
             return -1;
         }
-        var_dump($ret);
+//        var_dump($ret);
         try {
             $ret = $this->sarbacane->get('/lists/'.$this->sarbacane_listid.'/contacts', array());
         }
@@ -1464,8 +1651,8 @@ class DolSarbacane extends CommonObject {
             dol_syslog(get_class($this)."::sendSarbacaneCampaign ".$this->error, LOG_ERR);
             return -1;
         }
-        var_dump($ret);
-        exit;
+//        var_dump($ret);
+//        exit;
     }
 
 }
@@ -1485,9 +1672,27 @@ class DolSarbacaneeMailLine {
     }
 }
 
+/**
+ * Class DolSarbacaneTargetLine is a contact in a sarbacane campaign
+ */
 class DolSarbacaneTargetLine extends DolSarbacane {
-    var $email;
-    var $status;
+	public $id;
+	public $fk_contact;
+	public $sarbacane_campaignid;
+	public $sarbacane_contactcampaignid;
+	public $fk_user_author;
+	public $datec = '';
+	public $fk_user_mod;
+	public $tms = '';
+	public $statut = 0;
+	public $nb_click = 0;
+	public $nb_open = 0;
+	public $npai = '';
+	public $unsubscribe = 0;
+	public $unsubscribed_email = '';
+	public $used_blacklist = 'DEFAULT_BLACKLIST';
+
+	public $table_element = 'sarbacane_campaign_contact';
 
     /**
      * Constructor
@@ -1496,6 +1701,305 @@ class DolSarbacaneTargetLine extends DolSarbacane {
         parent::__construct($db);
         return 0;
     }
+
+	/**
+	 * Create object into database
+	 *
+	 * @param User $user      that creates
+	 * @param int  $notrigger triggers after, 1=disable triggers
+	 * @return int <0 if KO, Id of created object if OK
+	 */
+	public function create($user, $notrigger = 0) {
+		global $conf, $langs;
+
+		$error = 0;
+
+		if(isset($this->fk_contact)) $this->fk_contact = trim($this->fk_contact);
+		if(isset($this->sarbacane_campaignid)) $this->sarbacane_campaignid = trim($this->sarbacane_campaignid);
+		if(isset($this->sarbacane_contactcampaignid)) $this->sarbacane_id = trim($this->sarbacane_contactcampaignid);
+
+		// Insert request
+		$sql = "INSERT ".MAIN_DB_PREFIX.$this->table_element."(";
+		$sql.= " fk_contact,";
+		$sql.= " sarbacane_campaignid,";
+		$sql.= " sarbacane_contactcampaignid,";
+		$sql.= " fk_user_author,";
+		$sql.= " datec,";
+		$sql.= " fk_user_mod";
+		$sql.= ") VALUES (";
+		$sql.= " '".$this->fk_contact."',";
+		$sql.= " '".$this->sarbacane_campaignid."',";
+		$sql.= " '".$this->sarbacane_contactcampaignid."',";
+		$sql.= " '".$user->id."',";
+		$sql.= " '".$this->db->idate(dol_now())."',";
+		$sql.= " '".$user->id."'";
+		$sql.= ")";
+
+		$this->db->begin();
+
+		dol_syslog(get_class($this)."::create sql=".$sql, LOG_DEBUG);
+		$resql = $this->db->query($sql);
+		if(! $resql) {
+			$error++;
+			$this->errors[] = "Error ".$this->db->lasterror();
+		}
+
+		if(! $error) {
+			$this->id = $this->db->last_insert_id(MAIN_DB_PREFIX.$this->table_element);
+
+			if(! $notrigger) {
+				// Uncomment this and change MYOBJECT to your own tag if you
+				// want this action calls a trigger.
+
+				 // Call triggers
+				 include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
+				 $interface=new Interfaces($this->db);
+				 $result=$interface->run_triggers('SARBACANE_CAMPAIGN_CONTACT_CREATE',$this,$user,$langs,$conf);
+				 if ($result < 0) { $error++; $this->errors=$interface->errors; }
+				 // End call triggers
+			}
+		}
+
+		// Commit or rollback
+		if($error) {
+			foreach($this->errors as $errmsg) {
+				dol_syslog(get_class($this)."::create ".$errmsg, LOG_ERR);
+				$this->error .= ($this->error ? ', '.$errmsg : $errmsg);
+			}
+			$this->db->rollback();
+			return -1 * $error;
+		}
+		else {
+			$this->db->commit();
+			return $this->id;
+		}
+	}
+
+	/**
+	 * load object from database
+	 *
+	 * @param string $sarbacane_contactcampaignid id coté sarbacane du contact dans la campagne
+	 *
+	 * @return int <0 KO, 0 not found, >0 OK
+	 * @throws Exception
+	 */
+	public function fetchBySarbacaneContactCampaignId($sarbacane_contactcampaignid)
+	{
+		$sql = "SELECT rowid, fk_contact, sarbacane_campaignid, sarbacane_contactcampaignid, fk_user_author, datec, fk_user_mod, tms, statut, nb_click, nb_open, npai, unsubscribe, unsubscribed_email, used_blacklist";
+		$sql.= " FROM ".MAIN_DB_PREFIX.$this->table_element;
+		$sql.= " WHERE sarbacane_contactcampaignid = '".$sarbacane_contactcampaignid."'";
+
+		$resql = $this->db->query($sql);
+
+		if ($resql)
+		{
+			if($this->db->num_rows($resql)) {
+				$obj = $this->db->fetch_object($resql);
+
+				$this->id = $obj->rowid;
+				$this->fk_contact = $obj->fk_contact;
+				$this->sarbacane_campaignid = $obj->sarbacane_campaignid;
+				$this->sarbacane_contactcampaignid = $obj->sarbacane_contactcampaignid;
+				$this->fk_user_author = $obj->fk_user_author;
+				$this->datec = $this->db->jdate($obj->datec);
+				$this->fk_user_mod = $obj->fk_user_mod;
+				$this->tms = $this->db->jdate($obj->tms);
+				$this->statut = $obj->statut;
+				$this->nb_click = $obj->nb_click;
+				$this->nb_open = $obj->nb_open;
+				$this->npai = $obj->npai;
+				$this->unsubscribe = $obj->unsubscribe;
+				$this->unsubscribed_email = $obj->unsubscribed_email;
+				$this->used_blacklist = $obj->used_blacklist;
+
+				$this->db->free($resql);
+			}
+			else return 0;
+
+			return 1;
+		}
+		else {
+			$this->error = "Error ".$this->db->lasterror();
+			dol_syslog(get_class($this)."::fetch ".$this->error, LOG_ERR);
+			return -1;
+		}
+	}
+
+	/**
+	 * Update db for line
+	 * @param int $user
+	 * @param int $notrigger
+	 * @return float|int
+	 * @throws Exception
+	 */
+	public function update($user = 0, $notrigger = 0)
+	{
+		global $conf, $langs;
+
+		$error = 0;
+
+		if(isset($this->fk_contact)) $this->fk_contact = trim($this->fk_contact);
+		if(isset($this->sarbacane_campaignid)) $this->sarbacane_campaignid = trim($this->sarbacane_campaignid);
+		if(isset($this->sarbacane_contactcampaignid)) $this->sarbacane_contactcampaignid = trim($this->sarbacane_contactcampaignid);
+		if(isset($this->npai)) $this->npai = trim($this->npai);
+		if(empty($this->unsubscribe)) $this->unsubscribe = 0;
+		if(isset($this->unsubscribed_email)) $this->unsubscribed_email = trim($this->unsubscribed_email);
+		if(isset($this->used_blacklist)) $this->used_blacklist = trim($this->used_blacklist);
+		$this->nb_click = intval($this->nb_click);
+		$this->nb_open = intval($this->nb_open);
+
+		$sql = "UPDATE ".MAIN_DB_PREFIX.$this->table_element." SET";
+		$sql.= " fk_contact=".$this->fk_contact;
+		$sql.= ",sarbacane_campaignid='".$this->db->escape($this->sarbacane_campaignid)."'";
+		$sql.= ",sarbacane_contactcampaignid='".$this->db->escape($this->sarbacane_contactcampaignid)."'";
+		$sql.= ",fk_user_mod=".$user->id;
+		$sql.= ",statut=".$this->statut;
+		$sql.= ",nb_click=".$this->nb_click;
+		$sql.= ",nb_open=".$this->nb_open;
+		$sql.= ",npai='".$this->db->escape($this->npai)."'";
+		$sql.= ",unsubscribe=".$this->unsubscribe;
+		$sql.= ",unsubscribed_email='".$this->db->escape($this->unsubscribed_email)."'";
+		$sql.= ",used_blacklist='".$this->db->escape($this->used_blacklist)."'";
+		$sql.= " WHERE rowid=".$this->id;
+
+		$this->db->begin();
+
+		dol_syslog(get_class($this)."::update sql=".$sql, LOG_DEBUG);
+		$resql = $this->db->query($sql);
+		if(! $resql) {
+			$error++;
+			$this->errors[] = "Error ".$this->db->lasterror();
+		}
+
+		if(! $error) {
+			if(! $notrigger) {
+				// Uncomment this and change MYOBJECT to your own tag if you
+				// want this action calls a trigger.
+
+				 // Call triggers
+				 include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
+				 $interface=new Interfaces($this->db);
+				 $result=$interface->run_triggers('SARBACANE_CAMPAIGN_CONTACT_MODIFY',$this,$user,$langs,$conf);
+				 if ($result < 0) { $error++; $this->errors=$interface->errors; }
+				 // End call triggers
+			}
+		}
+
+		// Commit or rollback
+		if($error) {
+			foreach($this->errors as $errmsg) {
+				dol_syslog(get_class($this)."::update ".$errmsg, LOG_ERR);
+				$this->error .= ($this->error ? ', '.$errmsg : $errmsg);
+			}
+			$this->db->rollback();
+			return -1 * $error;
+		}
+		else {
+			$this->db->commit();
+			return 1;
+		}
+
+	}
+
+	/**
+	 * Delete object in database
+	 *
+	 * @param User $user      that deletes
+	 * @param int  $notrigger triggers after, 1=disable triggers
+	 * @return int <0 if KO, >0 if OK
+	 */
+	function delete($user, $notrigger = 0) {
+		global $conf, $langs;
+		$error = 0;
+
+		$this->db->begin();
+
+		if(! $error) {
+			if(! $notrigger) {
+				// Uncomment this and change MYOBJECT to your own tag if you
+				// want this action calls a trigger.
+
+				 // Call triggers
+				 include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
+				 $interface=new Interfaces($this->db);
+				 $result=$interface->run_triggers('SARBACANE_CAMPAIGN_CONTACT_DELETE',$this,$user,$langs,$conf);
+				 if ($result < 0) { $error++; $this->errors=$interface->errors; }
+				 // End call triggers
+			}
+		}
+
+		if(! $error) {
+			$sql = "DELETE FROM ".MAIN_DB_PREFIX.$this->table_element;
+			$sql .= " WHERE rowid=".$this->id;
+
+			dol_syslog(get_class($this)."::delete sql=".$sql);
+			$resql = $this->db->query($sql);
+			if(! $resql) {
+				$error++;
+				$this->errors[] = "Error ".$this->db->lasterror();
+			}
+		}
+
+		// Commit or rollback
+		if($error) {
+			foreach($this->errors as $errmsg) {
+				dol_syslog(get_class($this)."::delete ".$errmsg, LOG_ERR);
+				$this->error .= ($this->error ? ', '.$errmsg : $errmsg);
+			}
+			$this->db->rollback();
+			return -1 * $error;
+		}
+		else {
+			$this->db->commit();
+			return 1;
+		}
+	}
+
+	public function getAverageStatus()
+	{
+		global $langs;
+		$error = $nb_active = $nb_total = $average = 0;
+
+		if (empty($this->fk_contact))
+		{
+			$this->error = 'No contact id defined';
+			return -1;
+		}
+
+		$sql = "SELECT COUNT(*) as nb FROM ".MAIN_DB_PREFIX.$this->table_element." WHERE fk_contact = ".$this->fk_contact;
+		$resql = $this->db->query($sql);
+		if(! $resql) {
+			$error++;
+			$this->error = "Error ".$this->db->lasterror();
+			return -2;
+		}
+		else
+		{
+			$obj = $this->db->fetch_object($resql);
+			$nb_total = intval($obj->nb);
+		}
+
+		if (empty($nb_total)) return $langs->trans('SarbInactiveContact');
+
+		$resql = $this->db->query($sql . " AND statut = 1");
+		if(! $resql) {
+			$error++;
+			$this->error = "Error ".$this->db->lasterror();
+			return -2;
+		}
+		else
+		{
+			$obj = $this->db->fetch_object($resql);
+			$nb_active = intval($obj->nb);
+
+			if (empty($nb_active)) return $langs->trans('SarbInactiveContact');
+		}
+		$average = $nb_active / $nb_total;
+
+		if ($average < 0.3) return $langs->trans('SarbNotSoActiveContact');
+		else if ($average < 0.6) return $langs->trans('SarbMiddleActiveContact');
+		else return $langs->trans('SarbActiveContact');
+	}
 }
 
 class DolSarbacaneActivitesLine {
