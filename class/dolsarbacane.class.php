@@ -671,6 +671,7 @@ class DolSarbacane extends CommonObject {
 
         $sql = "SELECT COUNT(rowid) as nb_contact FROM ".MAIN_DB_PREFIX.$this::$campaign_contact_table." WHERE sarbacane_campaignid = '".$this->db->escape($campaignId)."'";
         $resql = $this->db->query($sql);
+
         if ($resql)
 		{
 			$obj = $this->db->fetch_object($resql);
@@ -694,6 +695,30 @@ class DolSarbacane extends CommonObject {
 		if (empty($error)) return 1;
         else return -1;
     }
+
+	/**
+	 * Retreive stats for sarbacane campaign
+	 *
+	 * @param string $campaignId sarbacane campaign ID
+	 * @return int <0 if KO, >0 if OK
+	 */
+	function getCampaignStat($campaignId) {
+
+		$this->getInstanceSarbacane();
+		$this->CampaignStats = array();
+		$error = 0;
+
+		try {
+			$this->CampaignStats = array_merge($this->CampaignStats, $this->sarbacane->get('reports/'.$campaignId , array()));
+		}
+		catch(Exception $e) {
+			$this->errors[] = $e->getMessage($campaignId);
+			$error++;
+		}
+
+		if (empty($error)) return 1;
+		else return -1;
+	}
 
 	/**
 	 * update stats for sarbacane campaigns recipients
@@ -724,8 +749,20 @@ class DolSarbacane extends CommonObject {
 			foreach ($TCampaignId as $sarbacaneCampaignId)
 			{
 				try {
+
+					//on récupère le mailing associé à la campagne sarbacane
+					$sql = "SELECT fk_mailing FROM ".MAIN_DB_PREFIX.$this->table_element." WHERE sarbacane_id = '".$sarbacaneCampaignId."'";
+					$resql = $this->db->query($sql);
+
+					if($resql){
+						$obj = $this->db->fetch_object($resql);
+						$sarbacaneCampaign_fkmailing = $obj->fk_mailing;
+					}
+
 					$res = $this->getCampaignRecipientStat($sarbacaneCampaignId);
-					if ($res > 0 && !empty($this->CampaignRecipientStats))
+					$res2 = $this->getCampaignStat($sarbacaneCampaignId);
+
+					if ($res > 0  && !empty($this->CampaignRecipientStats))
 					{
 						foreach ($this->CampaignRecipientStats as $campaignStat)
 						{
@@ -757,10 +794,35 @@ class DolSarbacane extends CommonObject {
 										}
 									}
 								}
+
+								if($campaignStat['success'] == true){
+									$sql = "UPDATE ".MAIN_DB_PREFIX."mailing_cibles SET statut = 1 WHERE fk_contact =".((int)$campaignContact->fk_contact)." AND fk_mailing =".((int)$campaignContact->fk_contact);
+									$this->db->query($sql);
+
+									if(!$resql) {
+										$this->errors = $this->db->lastqueryerror();
+										$error++;
+									}
+								}
 							}
 
 						}
 					}
+
+					if($res2 > 0 && !empty($this->CampaignStats)){
+
+						foreach($this->CampaignStats as $campaignStat){
+							$sql="UPDATE ".MAIN_DB_PREFIX."mailing SET date_envoi = '".dol_print_date($campaignStat['date'], '%Y-%m-%d %H:%M:%S')."' WHERE rowid=".((int)$sarbacaneCampaign_fkmailing);
+							$resql = $this->db->query($sql);
+
+							if(!$resql) {
+								$this->errors = $this->db->lastqueryerror();
+								$error++;
+							}
+
+						}
+					}
+
 				}
 				catch(Exception $e) {
 					$this->errors[] = $e->getMessage($sarbacaneCampaignId);
