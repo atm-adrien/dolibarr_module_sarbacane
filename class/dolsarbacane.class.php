@@ -812,7 +812,7 @@ class DolSarbacane extends CommonObject {
 					if($res2 > 0 && !empty($this->CampaignStats)){
 
 						foreach($this->CampaignStats as $campaignStat){
-							$sql="UPDATE ".MAIN_DB_PREFIX."mailing SET date_envoi = '".dol_print_date($campaignStat['date'], '%Y-%m-%d %H:%M:%S')."' WHERE rowid=".$sarbacaneCampaign_fkmailing;
+							$sql="UPDATE ".MAIN_DB_PREFIX."mailing SET date_envoi = '".dol_print_date($campaignStat['date'], '%Y-%m-%d %H:%M:%S')."' WHERE rowid=".((int)$sarbacaneCampaign_fkmailing);
 							$resql = $this->db->query($sql);
 
 							if(!$resql) {
