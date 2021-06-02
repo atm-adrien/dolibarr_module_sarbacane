@@ -739,6 +739,7 @@ class DolSarbacane extends CommonObject {
     	if (empty($TCampaignId))
 		{
 			$sql = "SELECT sarbacane_id FROM ".MAIN_DB_PREFIX.$this->table_element;
+			$sql .= " WHERE date_format(datec, '%Y-%m-%d') > '".date('Y-m-d', strtotime('-3 month', dol_now()))."'";
 			$resql = $this->db->query($sql);
 			if ($resql)
 			{
