@@ -139,7 +139,8 @@ if ($action=='sendsarbacanecampaign') {
 	} else {
 		//Update mailing general status
 		$object->statut=3;
-		$sql="UPDATE ".MAIN_DB_PREFIX."mailing SET statut=".$object->statut." WHERE rowid=".$object->id;
+		$sql="UPDATE ".MAIN_DB_PREFIX."mailing SET statut=".((int)$object->statut).", date_envoi = '".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')."' WHERE rowid=".((int)$object->id);
+
 		dol_syslog("sarbacane/sarbacane.php: update global status sql=".$sql, LOG_DEBUG);
 		$resql2=$db->query($sql);
 		if (! $resql2)	{
