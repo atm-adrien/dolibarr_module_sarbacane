@@ -804,7 +804,7 @@ class DolSarbacane extends CommonObject {
 								}
 
 								if($campaignStat['success'] == true){
-									$sql = "UPDATE ".MAIN_DB_PREFIX."mailing_cibles SET statut = 1 WHERE fk_contact =".((int)$campaignContact->fk_contact)." AND fk_mailing =".((int)$sarbacaneCampaign_fkmailing);
+									$sql = "UPDATE ".MAIN_DB_PREFIX."mailing_cibles SET statut = 1 WHERE email ='".$campaignStat['recipient']['email']."' AND fk_mailing =".((int)$sarbacaneCampaign_fkmailing);
 
 									$this->db->query($sql);
 
