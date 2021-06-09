@@ -1540,6 +1540,13 @@ class DolSarbacane extends CommonObject {
         if($result < 0) {
             return -1;
         }
+
+        if(!empty($conf->global->SARBACANE_EXPORT_EMPTYLIST)) {
+			$this->getInstanceSarbacane();
+
+			$this->sarbacane->post('lists/' . $this->sarbacane_listid . '/empty', '');
+		}
+
         if(count($this->email_lines)) {
 
             $result_add_to_list = $this->addEmailToList($this->sarbacane_listid, $this->email_lines);
