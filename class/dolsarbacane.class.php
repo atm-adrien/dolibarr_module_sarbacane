@@ -673,16 +673,9 @@ class DolSarbacane extends CommonObject {
 		$this->CampaignRecipientStats = array();
         $error = 0;
 
-        $sql = "SELECT COUNT(rowid) as nb_contact FROM ".MAIN_DB_PREFIX.$this::$campaign_contact_table." WHERE sarbacane_campaignid = '".$this->db->escape($campaignId)."'";
-        $resql = $this->db->query($sql);
-
-        if ($resql)
-		{
-			$obj = $this->db->fetch_object($resql);
-			$nb_contact = $obj->nb_contact;
-
 			$offset = 0;
-			while ($offset < $nb_contact && !$error)
+
+			while (1)
 			{
 				try {
 					$this->CampaignRecipientStats = array_merge($this->CampaignRecipientStats, $this->sarbacane->get('reports/'.$campaignId.'/recipients?offset='.$offset, array()));					}
@@ -691,10 +684,14 @@ class DolSarbacane extends CommonObject {
 					$error++;
 				}
 
-				$offset += 1000;
+				if(count($this->sarbacane->get( 'reports/'.$campaignId.'/recipients?offset='.$offset, array())) < 1000) {
+					break;
+				}
+				else {
+					$offset += 1000;
+					continue;
+				}
 			}
-
-		}
 
 		if (empty($error)) return 1;
         else return -1;
@@ -751,6 +748,7 @@ class DolSarbacane extends CommonObject {
 
 		if (!empty($TCampaignId))
 		{
+
 			foreach ($TCampaignId as $sarbacaneCampaignId)
 			{
 				try {
@@ -802,16 +800,16 @@ class DolSarbacane extends CommonObject {
 										}
 									}
 								}
+							}
 
-								if($campaignStat['success'] == true){
-									$sql = "UPDATE ".MAIN_DB_PREFIX."mailing_cibles SET statut = 1 WHERE email ='".$campaignStat['recipient']['email']."' AND fk_mailing =".((int)$sarbacaneCampaign_fkmailing);
+							if ($campaignStat['success'] == true) {
+								$sql = "UPDATE " . MAIN_DB_PREFIX . "mailing_cibles SET statut = 1 WHERE email ='" . $campaignStat['recipient']['email'] . "' AND fk_mailing =" . ((int)$sarbacaneCampaign_fkmailing);
 
-									$this->db->query($sql);
+								$this->db->query($sql);
 
-									if(!$resql) {
-										$this->errors = $this->db->lastqueryerror();
-										$error++;
-									}
+								if (!$resql) {
+									$this->errors = $this->db->lastqueryerror();
+									$error++;
 								}
 							}
 
