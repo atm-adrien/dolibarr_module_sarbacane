@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
 
 Version 1.1 (2021-06-09)
 =====================
+- FIX : Màj statistiques => statuts des destinataires du mailing même si il n'y a pas de destinataires de type contact - *15/06/2021* - 1.1.1
 - NEW : Ajout conf "SARBACANE_EXPORT_EMPTYLIST" qui permet de vider totalement la liste de contacts avant l'ajout lors de l'export - *09/06/2021* - 1.1
 
 ## Version 1.0
