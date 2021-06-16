@@ -456,7 +456,7 @@ class DolSarbacane extends CommonObject {
         $sql .= " sarbacane_id=".(isset($this->sarbacane_id) ? "'".$this->sarbacane_id."'" : "null").",";
         $sql .= " sarbacane_webid=".(isset($this->sarbacane_webid) ? "'".$this->sarbacane_webid."'" : "null").",";
         $sql .= " sarbacane_listid=".(isset($this->sarbacane_listid) ? "'".$this->db->escape($this->sarbacane_listid)."'" : "null").",";
-        $sql .= " sarbacane_blacklistid=".(isset($this->sarbacane_blacklistid) ? "'".$this->db->escape($this->sarbacane_blacklistid)."'" : "DEFAULT_BLACKLIST").",";
+        $sql .= " sarbacane_blacklistid=".(!empty($this->sarbacane_blacklistid) ? "'".$this->db->escape($this->sarbacane_blacklistid)."'" : "DEFAULT_BLACKLIST").",";
         $sql .= " sarbacane_segmentid=".(isset($this->sarbacane_segmentid) ? "'".$this->db->escape($this->sarbacane_segmentid)."'" : "null").",";
         $sql .= " sarbacane_sender_name=".(isset($this->sarbacane_sender_name) ? "'".$this->db->escape($this->sarbacane_sender_name)."'" : "null").",";
 
