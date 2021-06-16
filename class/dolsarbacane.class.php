@@ -678,19 +678,24 @@ class DolSarbacane extends CommonObject {
 			while (1)
 			{
 				try {
-					$this->CampaignRecipientStats = array_merge($this->CampaignRecipientStats, $this->sarbacane->get('reports/'.$campaignId.'/recipients?offset='.$offset, array()));					}
+
+					$campaignRecipientStats = $this->sarbacane->get('reports/' . $campaignId . '/recipients?offset=' . $offset, array());
+					$this->CampaignRecipientStats = array_merge($this->CampaignRecipientStats, $campaignRecipientStats);
+
+					if (count($campaignRecipientStats) < 1000) {
+						break;
+					} else {
+						$offset += 1000;
+						continue;
+					}
+				}
 				catch(Exception $e) {
 					$this->errors[] = $e->getMessage($campaignId);
 					$error++;
-				}
-
-				if(count($this->sarbacane->get( 'reports/'.$campaignId.'/recipients?offset='.$offset, array())) < 1000) {
 					break;
 				}
-				else {
-					$offset += 1000;
-					continue;
-				}
+
+
 			}
 
 		if (empty($error)) return 1;
