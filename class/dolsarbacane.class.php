@@ -677,28 +677,30 @@ class DolSarbacane extends CommonObject {
 		$this->CampaignRecipientStats = array();
         $error = 0;
 
-        $sql = "SELECT COUNT(rowid) as nb_contact FROM ".MAIN_DB_PREFIX.$this::$campaign_contact_table." WHERE sarbacane_campaignid = '".$this->db->escape($campaignId)."'";
-        $resql = $this->db->query($sql);
-
-        if ($resql)
-		{
-			$obj = $this->db->fetch_object($resql);
-			$nb_contact = $obj->nb_contact;
-
 			$offset = 0;
-			while ($offset < $nb_contact && !$error)
+
+			while (1)
 			{
 				try {
-					$this->CampaignRecipientStats = array_merge($this->CampaignRecipientStats, $this->sarbacane->get('reports/'.$campaignId.'/recipients?offset='.$offset, array()));					}
+
+					$campaignRecipientStats = $this->sarbacane->get('reports/' . $campaignId . '/recipients?offset=' . $offset, array());
+					$this->CampaignRecipientStats = array_merge($this->CampaignRecipientStats, $campaignRecipientStats);
+
+					if (count($campaignRecipientStats) < 1000) {
+						break;
+					} else {
+						$offset += 1000;
+						continue;
+					}
+				}
 				catch(Exception $e) {
 					$this->errors[] = $e->getMessage($campaignId);
 					$error++;
+					break;
 				}
 
-				$offset += 1000;
-			}
 
-		}
+			}
 
 		if (empty($error)) return 1;
         else return -1;
@@ -743,6 +745,7 @@ class DolSarbacane extends CommonObject {
     	if (empty($TCampaignId))
 		{
 			$sql = "SELECT sarbacane_id FROM ".MAIN_DB_PREFIX.$this->table_element;
+			$sql .= " WHERE date_format(datec, '%Y-%m-%d') > '".date('Y-m-d', strtotime('-3 month', dol_now()))."'";
 			$resql = $this->db->query($sql);
 			if ($resql)
 			{
@@ -754,6 +757,7 @@ class DolSarbacane extends CommonObject {
 
 		if (!empty($TCampaignId))
 		{
+
 			foreach ($TCampaignId as $sarbacaneCampaignId)
 			{
 				try {
@@ -805,16 +809,16 @@ class DolSarbacane extends CommonObject {
 										}
 									}
 								}
+							}
 
-								if($campaignStat['success'] == true){
-									$sql = "UPDATE ".MAIN_DB_PREFIX."mailing_cibles SET statut = 1 WHERE fk_contact =".((int)$campaignContact->fk_contact)." AND fk_mailing =".((int)$sarbacaneCampaign_fkmailing);
+							if ($campaignStat['success'] == true) {
+								$sql = "UPDATE " . MAIN_DB_PREFIX . "mailing_cibles SET statut = 1 WHERE email ='" . $campaignStat['recipient']['email'] . "' AND fk_mailing =" . ((int)$sarbacaneCampaign_fkmailing);
 
-									$this->db->query($sql);
+								$this->db->query($sql);
 
-									if(!$resql) {
-										$this->errors = $this->db->lastqueryerror();
-										$error++;
-									}
+								if (!$resql) {
+									$this->errors = $this->db->lastqueryerror();
+									$error++;
 								}
 							}
 
@@ -1543,6 +1547,13 @@ class DolSarbacane extends CommonObject {
         if($result < 0) {
             return -1;
         }
+
+        if(!empty($conf->global->SARBACANE_EXPORT_EMPTYLIST)) {
+			$this->getInstanceSarbacane();
+
+			$this->sarbacane->post('lists/' . $this->sarbacane_listid . '/empty', '');
+		}
+
         if(count($this->email_lines)) {
 
             $result_add_to_list = $this->addEmailToList($this->sarbacane_listid, $this->email_lines);
