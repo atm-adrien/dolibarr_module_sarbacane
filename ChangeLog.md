@@ -4,10 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-- FIX Modify module position to place it under Emailing module in perms list *2021-06-02* - 1.0.3
+- FIX Set blacklist_id by "DEFAULT_BLACKLIST" when it is empty *2021-06-16* - 1.1.5
+- FIX Modify module position to place it under Emailing module in perms list *2021-06-02* - 1.1.4
 - NEW (describe any new feature that is only included in the main branch but not
-  yet in release branches) *2021-06-01* - 1.0.2
-- FIX Update campaign stats for the last three months only *2021-06-01* - 1.0.1 
+  yet in release branches) *2021-06-01* - 1.1.3
+- FIX Update campaign stats for the last three months only *2021-06-01* - 1.1.2 
 
 Version 1.1 (2021-06-09)
 =====================
