@@ -635,4 +635,30 @@ class Interfacesarbacanetrigger extends DolibarrTriggers
 
 		return 0;
 	}
+
+	/**
+	 * @param string $action
+	 * @param Contact $object
+	 * @param User $user
+	 * @param Translate $langs
+	 * @param $conf
+	 * @return int
+	 */
+    public function mailingDelete($action, $object, $user, $langs, $conf)
+	{
+		global $db, $user;
+
+		dol_include_once('sarbacane/class/dolsarbacane.class.php');
+
+		$sarbacane = new DolSarbacane($db);
+		$res = $sarbacane->fetch_by_mailing($object->id);
+
+		if($res > 0){
+			return $sarbacane->delete($user);
+		} elseif($res < 0){
+			return -1;
+		}
+
+		return 0;
+	}
 }

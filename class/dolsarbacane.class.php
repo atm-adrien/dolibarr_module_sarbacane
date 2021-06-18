@@ -541,6 +541,19 @@ class DolSarbacane extends CommonObject {
             }
         }
 
+        //on supprime aussi la ligne liée à la campagne sarbacane dans la table sarbacane_campaign_contact
+        if(! $error && !empty($this->sarbacane_id)) {
+            $sql = "DELETE FROM ".MAIN_DB_PREFIX."sarbacane_campaign_contact";
+            $sql .= " WHERE sarbacane_campaignid='".$this->sarbacane_id."'";
+
+            dol_syslog(get_class($this)."::delete sql=".$sql);
+            $resql = $this->db->query($sql);
+            if(! $resql) {
+                $error++;
+                $this->errors[] = "Error ".$this->db->lasterror();
+            }
+        }
+
         // Commit or rollback
         if($error) {
             foreach($this->errors as $errmsg) {
