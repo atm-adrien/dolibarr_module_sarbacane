@@ -150,8 +150,8 @@ dol_fiche_end();
 $sql = "SELECT";
 $sql.= " m.titre, s.fk_mailing, scc.sarbacane_campaignid, scc.statut, scc.nb_open, scc.nb_click, scc.unsubscribe, scc.unsubscribed_email, scc.used_blacklist";
 $sql.= " FROM ".MAIN_DB_PREFIX.DolSarbacane::$campaign_contact_table." as scc";
-$sql.= " JOIN ".MAIN_DB_PREFIX."sarbacane as s ON s.sarbacane_id = scc.sarbacane_campaignid";
-$sql.= " JOIN ".MAIN_DB_PREFIX."mailing m ON m.rowid = s.fk_mailing";
+$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."sarbacane as s ON s.sarbacane_id = scc.sarbacane_campaignid";
+$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."mailing m ON m.rowid = s.fk_mailing";
 $sql.= " WHERE scc.fk_contact = ".$id;
 // Todo ajouter les filtres
 

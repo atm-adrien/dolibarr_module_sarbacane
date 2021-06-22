@@ -1230,9 +1230,10 @@ class DolSarbacane extends CommonObject {
      */
     public function getContactDolibarrIdByMail ($email) {
         if(!empty($this->email_lines)){
-            foreach($this->email_lines as $email_line) {
+        	foreach($this->email_lines as $email_line) {
                 $tmp_array = explode('&', $email_line);
                 if($tmp_array[0] == $email && $tmp_array[1] == 'contact') return $tmp_array[2];
+                if($tmp_array[0] == $email && $tmp_array[1] == 'DistributionList') return $tmp_array[3];
             }
         }
 
