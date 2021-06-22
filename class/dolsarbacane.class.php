@@ -945,25 +945,46 @@ class DolSarbacane extends CommonObject {
 
             if(! empty($tmp_array[0]) && isValidEmail($tmp_array[0]) && ! in_array($tmp_array[0], $email_added)) {
 
-                if($tmp_array[1] == 'contact') {
-                    $contactstatic = new Contact($this->db);
-                    $result = $contactstatic->fetch($tmp_array[2]);
+            	if(!empty($tmp_array[3])) {
 
-                    if($result < 0) {
-                        $this->error = $contactstatic->error;
-                        dol_syslog(get_class($this)."::getListDestinaries ".$this->error, LOG_ERR);
-                        return -1;
-                    }
-                    if(! empty($contactstatic->id)) {
-                        $merge_vars->FNAME = $contactstatic->firstname;
-                        $merge_vars->LNAME = $contactstatic->lastname;
-                        $merge_vars->CIVILITY = $contactstatic->civility;
-                        $merge_vars->EMAIL = $tmp_array[0];
-                    }
-                }
-                if($tmp_array[1] == 'thirdparty') {
-                    $socstatic = new Societe($this->db);
-                    $result = $socstatic->fetch($tmp_array[2]);
+					if ($tmp_array[1] == 'contact' || $tmp_array[1] == 'DistributionList') {
+						$contactstatic = new Contact($this->db);
+						$result = $contactstatic->fetch($tmp_array[3]);
+
+						if ($result < 0) {
+							$this->error = $contactstatic->error;
+							dol_syslog(get_class($this) . "::getListDestinaries " . $this->error, LOG_ERR);
+							return -1;
+						}
+						if (!empty($contactstatic->id)) {
+							$merge_vars->FNAME = $contactstatic->firstname;
+							$merge_vars->LNAME = $contactstatic->lastname;
+							$merge_vars->CIVILITY = $contactstatic->civility;
+							$merge_vars->EMAIL = $tmp_array[0];
+						}
+					}
+					if ($tmp_array[1] == 'thirdparty') {
+						$socstatic = new Societe($this->db);
+						$result = $socstatic->fetch($tmp_array[2]);
+						if ($result < 0) {
+							$this->error = $socstatic->error;
+							dol_syslog(get_class($this) . "::getListDestinaries " . $this->error, LOG_ERR);
+							return -1;
+						}
+						if (!empty($socstatic->id)) {
+							$merge_vars->FNAME = $socstatic->name;
+							$merge_vars->EMAIL = $tmp_array[0];
+						}
+					}
+				} else {
+            		if(!empty($tmp_array[5])) $merge_vars->FNAME = $tmp_array[5];
+					if(!empty($tmp_array[4])) $merge_vars->LNAME = $tmp_array[4];
+					if(!empty($tmp_array[0])) $merge_vars->EMAIL = $tmp_array[0];
+				}
+
+
+                if($tmp_array[1] == 'file') {
+
                     if($result < 0) {
                         $this->error = $socstatic->error;
                         dol_syslog(get_class($this)."::getListDestinaries ".$this->error, LOG_ERR);
@@ -990,6 +1011,7 @@ class DolSarbacane extends CommonObject {
             }
         }
 
+
         dol_syslog(get_class($this).'::addEmailToList var_export($email_to_add)='.var_export($email_to_add, true), LOG_DEBUG);
         dol_syslog(get_class($this).'::addEmailToList count($email_to_add)='.count($email_to_add), LOG_DEBUG);
         $batch_email_to_add_error = array();
@@ -1005,7 +1027,7 @@ class DolSarbacane extends CommonObject {
                         "email" => $email['email_address'],
                         "phone" => ""
                     );
-                    if($email['tmp_array'][1] == 'contact') {
+                    if($tmp_array[1] == 'contact' || $tmp_array[1] == 'DistributionList') {
                         $found = 0;
 
                         $civ_id = 'CIVILITY_ID';
@@ -1026,7 +1048,7 @@ class DolSarbacane extends CommonObject {
                         $data[$name_id] = $email['merge_vars']->LNAME;
                         $data[$firstname_id] = $email['merge_vars']->FNAME;
 
-                        $TSarbacaneIds = $this->getSarbacaneContactIdByListId($email['tmp_array'][2], $listid);
+                        $TSarbacaneIds = $this->getSarbacaneContactIdByListId($email['tmp_array'][3], $listid);
                         $TSarbacaneContacts = $this->sarbacane->get('lists/'.$listid.'/contacts', array());
                         foreach($TSarbacaneContacts as $contact) {
                             if(in_array($contact['id'], $TSarbacaneIds)) $found = 1;
@@ -1412,7 +1434,7 @@ class DolSarbacane extends CommonObject {
         global $conf;
         $this->email_lines = array();
 
-        $sql = "SELECT mc.email,mc.source_type,mc.source_id";
+        $sql = "SELECT mc.lastname, mc.firstname, mc.email,mc.source_type,mc.source_id,mc.fk_contact";
         $sql .= " FROM ".MAIN_DB_PREFIX."mailing_cibles as mc";
         $sql .= " WHERE mc.fk_mailing=".$this->fk_mailing;
 
@@ -1425,7 +1447,7 @@ class DolSarbacane extends CommonObject {
                         $this->email_lines[] = strtolower($obj->email);
                     }
                     else if($returntype == 'toadd') {
-                        $this->email_lines[] = strtolower($obj->email).'&'.$obj->source_type.'&'.$obj->source_id;
+                        $this->email_lines[] = strtolower($obj->email).'&'.$obj->source_type.'&'.$obj->source_id.'&'.$obj->fk_contact.'&'.$obj->lastname.'&'.$obj->firstname;
                     }
                 }
             }
@@ -1566,6 +1588,7 @@ class DolSarbacane extends CommonObject {
 
 			$this->sarbacane->post('lists/' . $this->sarbacane_listid . '/empty', '');
 		}
+
 
         if(count($this->email_lines)) {
 

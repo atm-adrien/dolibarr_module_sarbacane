@@ -113,6 +113,7 @@ switch ($set) {
 
 switch ($async_action) {
 	case 'export':
+
 		$result=$sarbacane->exportDesttoSarbacane($listid);
 		exit;
 		break;
