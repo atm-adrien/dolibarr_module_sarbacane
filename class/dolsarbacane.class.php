@@ -945,56 +945,41 @@ class DolSarbacane extends CommonObject {
 
             if(! empty($tmp_array[0]) && isValidEmail($tmp_array[0]) && ! in_array($tmp_array[0], $email_added)) {
 
-            	if(!empty($tmp_array[3])) {
+            	if ($tmp_array[1] == 'contact' || $tmp_array[1] == 'DistributionList') {
+            		$contactstatic = new Contact($this->db);
+            		$result = $contactstatic->fetch($tmp_array[3]);
 
-					if ($tmp_array[1] == 'contact' || $tmp_array[1] == 'DistributionList') {
-						$contactstatic = new Contact($this->db);
-						$result = $contactstatic->fetch($tmp_array[3]);
+            		if ($result < 0) {
+            			$this->error = $contactstatic->error;
+            			dol_syslog(get_class($this) . "::getListDestinaries " . $this->error, LOG_ERR);
+            			return -1;
+            		}
+            		if (!empty($contactstatic->id)) {
+            			$merge_vars->FNAME = $contactstatic->firstname;
+            			$merge_vars->LNAME = $contactstatic->lastname;
+            			$merge_vars->CIVILITY = $contactstatic->civility;
+            			$merge_vars->EMAIL = $tmp_array[0];
+            		}
+            	}
+            	if ($tmp_array[1] == 'thirdparty') {
+            		$socstatic = new Societe($this->db);
+            		$result = $socstatic->fetch($tmp_array[2]);
+            		if ($result < 0) {
+            			$this->error = $socstatic->error;
+            			dol_syslog(get_class($this) . "::getListDestinaries " . $this->error, LOG_ERR);
+            			return -1;
+            		}
+            		if (!empty($socstatic->id)) {
+            			$merge_vars->FNAME = $socstatic->name;
+            			$merge_vars->EMAIL = $tmp_array[0];
+            		}
+            	}
 
-						if ($result < 0) {
-							$this->error = $contactstatic->error;
-							dol_syslog(get_class($this) . "::getListDestinaries " . $this->error, LOG_ERR);
-							return -1;
-						}
-						if (!empty($contactstatic->id)) {
-							$merge_vars->FNAME = $contactstatic->firstname;
-							$merge_vars->LNAME = $contactstatic->lastname;
-							$merge_vars->CIVILITY = $contactstatic->civility;
-							$merge_vars->EMAIL = $tmp_array[0];
-						}
-					}
-					if ($tmp_array[1] == 'thirdparty') {
-						$socstatic = new Societe($this->db);
-						$result = $socstatic->fetch($tmp_array[2]);
-						if ($result < 0) {
-							$this->error = $socstatic->error;
-							dol_syslog(get_class($this) . "::getListDestinaries " . $this->error, LOG_ERR);
-							return -1;
-						}
-						if (!empty($socstatic->id)) {
-							$merge_vars->FNAME = $socstatic->name;
-							$merge_vars->EMAIL = $tmp_array[0];
-						}
-					}
-				} else {
+            	if($tmp_array[1] == 'file'){
             		if(!empty($tmp_array[5])) $merge_vars->FNAME = $tmp_array[5];
 					if(!empty($tmp_array[4])) $merge_vars->LNAME = $tmp_array[4];
 					if(!empty($tmp_array[0])) $merge_vars->EMAIL = $tmp_array[0];
 				}
-
-
-                if($tmp_array[1] == 'file') {
-
-                    if($result < 0) {
-                        $this->error = $socstatic->error;
-                        dol_syslog(get_class($this)."::getListDestinaries ".$this->error, LOG_ERR);
-                        return -1;
-                    }
-                    if(! empty($socstatic->id)) {
-                        $merge_vars->FNAME = $socstatic->name;
-                        $merge_vars->EMAIL = $tmp_array[0];
-                    }
-                }
 
                 dol_syslog(get_class($this)."::addEmailToList listid=".$listid." merge_vars=".var_export($merge_vars, true).' $tmp_array[0]='.$tmp_array[0], LOG_DEBUG);
 
@@ -1027,7 +1012,7 @@ class DolSarbacane extends CommonObject {
                         "email" => $email['email_address'],
                         "phone" => ""
                     );
-                    if($tmp_array[1] == 'contact' || $tmp_array[1] == 'DistributionList') {
+                    if($email['tmp_array'][1] == 'contact' || $email['tmp_array'][1] == 'DistributionList' || $email['tmp_array'][1] == 'file') {
                         $found = 0;
 
                         $civ_id = 'CIVILITY_ID';
