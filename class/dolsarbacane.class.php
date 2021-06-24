@@ -670,8 +670,14 @@ class DolSarbacane extends CommonObject {
         $error = 0;
 
         $this->email_lines = array();
-        $this->email_lines = $this->sarbacane->get('lists/'.$this->sarbacane_listid.'/contacts', array());
-
+        try {
+            $this->email_lines = $this->sarbacane->get('lists/'.$this->sarbacane_listid.'/contacts', array());
+        }
+        catch(Exception $e) {
+            $this->error = $e->getMessage();
+            dol_syslog(get_class($this)."::createSarbacaneCampaign ".$this->error, LOG_ERR);
+            return -1;
+        }
         if(empty($this->email_lines['message'])) {
             $emailsegment = 1;
         }
@@ -680,6 +686,7 @@ class DolSarbacane extends CommonObject {
         }
 
         return $emailsegment;
+
     }
 
     /**
@@ -1306,17 +1313,26 @@ class DolSarbacane extends CommonObject {
                 return -1;
             }
         }
-        $response = $this->sarbacane->post('lists', array('name' => $namelist));
-        if(empty($response['id'])) {
-            $this->error = $response['message'];
-            $this->errors[] = $this->error;
+        try {
+            $response = $this->sarbacane->post('lists', array('name' => $namelist));
+            if(empty($response['id'])) {
+                $this->error = $response['message'];
+                $this->errors[] = $this->error;
+                return -1;
+            }
+            $listid = $response['id'];
+
+            $response = $this->sarbacane->post('lists/'.$listid.'/fields', array('kind' => 'RADIO', 'caption' => 'Civilité'));
+            $response = $this->sarbacane->post('lists/'.$listid.'/fields', array('kind' => 'STRING', 'caption' => 'Prénom'));
+            $response = $this->sarbacane->post('lists/'.$listid.'/fields', array('kind' => 'STRING', 'caption' => 'Nom'));
+        }
+        catch(Exception $e) {
+            $this->error = $e->getMessage();
+            dol_syslog(get_class($this)."::createSarbacaneCampaign ".$this->error, LOG_ERR);
             return -1;
         }
-        $listid = $response['id'];
 
-        $response = $this->sarbacane->post('lists/'.$listid.'/fields', array('kind' => 'RADIO', 'caption' => 'Civilité'));
-        $response = $this->sarbacane->post('lists/'.$listid.'/fields', array('kind' => 'STRING', 'caption' => 'Prénom'));
-        $response = $this->sarbacane->post('lists/'.$listid.'/fields', array('kind' => 'STRING', 'caption' => 'Nom'));
+
         return $listid;
     }
 
@@ -1578,9 +1594,15 @@ class DolSarbacane extends CommonObject {
 
         if(!empty($conf->global->SARBACANE_EXPORT_EMPTYLIST)) {
 			$this->getInstanceSarbacane();
-
-			$this->sarbacane->post('lists/' . $this->sarbacane_listid . '/empty', '');
-		}
+            try {
+                $this->sarbacane->post('lists/'.$this->sarbacane_listid.'/empty', '');
+            }
+            catch(Exception $e) {
+                $this->error = $e->getMessage();
+                dol_syslog(get_class($this)."::exportDesttoSarbacane ".$this->error, LOG_ERR);
+                return -1;
+            }
+        }
 
 
         if(count($this->email_lines)) {

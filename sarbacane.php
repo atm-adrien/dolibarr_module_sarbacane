@@ -175,7 +175,7 @@ if ($action=='associateconfirm') {
 	$updatesegment=GETPOST('updatesegment','alpha');
 	$segmentid=GETPOST('segmentlist','alpha');
 	$selectblacklist=GETPOST('selectblacklist', 'alpha');
-	if(empty($newList)) {
+	if(empty($newList) || $newList == -1) {
 	    $listid=GETPOST('selectlist','alpha');
 	} else {
 	    $listid = $newList;
@@ -236,7 +236,7 @@ if(! empty($conf->global->SARBACANE_API_KEY)) {
 
             //retrive email for segment and Or List
 
-            if(! empty($sarbacane->sarbacane_listid)) {
+            if(! empty($sarbacane->sarbacane_listid) && $sarbacane->sarbacane_listid != -1) {
                 $result = $sarbacane->getEmailList();
 
                 if($result < 0) {
