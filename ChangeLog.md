@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 
 Version 1.1 (2021-06-09)
 =====================
+- FIX Mailing Delete Error Management *2021-06-24* - 1.1.8
 - FIX Distribution List Compatibility *2021-06-22* - 1.1.7
 - FIX delete sarbacane campaign and stats when mailing is deleting *2021-06-17* - 1.1.6
 - FIX Set blacklist_id by "DEFAULT_BLACKLIST" when it is empty *2021-06-16* - 1.1.5
