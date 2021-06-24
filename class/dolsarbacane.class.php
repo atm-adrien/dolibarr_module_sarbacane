@@ -771,6 +771,8 @@ class DolSarbacane extends CommonObject {
 		if (!empty($TCampaignId))
 		{
 
+			$countnosend = 0;	//on compte le nombre de destinataire pour qui l'envoi du mailing a échoué, si il y en a au moins 1, le statut de la campagne passe en "envoyée partiellement"
+
 			foreach ($TCampaignId as $sarbacaneCampaignId)
 			{
 				try {
@@ -833,15 +835,16 @@ class DolSarbacane extends CommonObject {
 									$this->errors = $this->db->lastqueryerror();
 									$error++;
 								}
+							} else {
+								$countnosend ++;
 							}
 
 						}
 					}
 
 					if($res2 > 0 && !empty($this->CampaignStats)){
-
 						foreach($this->CampaignStats as $campaignStat){
-							$sql="UPDATE ".MAIN_DB_PREFIX."mailing SET date_envoi = '".dol_print_date($campaignStat['date'], '%Y-%m-%d %H:%M:%S')."' WHERE rowid=".((int)$sarbacaneCampaign_fkmailing);
+							$sql="UPDATE ".MAIN_DB_PREFIX."mailing SET date_envoi = '".dol_print_date($campaignStat['date'], '%Y-%m-%d %H:%M:%S')."', statut ='" .((empty($countnosend)) ? '3' : '2'). "'WHERE rowid=".((int)$sarbacaneCampaign_fkmailing);
 							$resql = $this->db->query($sql);
 
 							if(!$resql) {
