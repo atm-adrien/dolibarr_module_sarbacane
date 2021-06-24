@@ -348,10 +348,14 @@ class DolSarbacane extends CommonObject {
                 $this->datec = $this->db->jdate($obj->datec);
                 $this->fk_user_mod = $obj->fk_user_mod;
                 $this->tms = $this->db->jdate($obj->tms);
-            }
-            $this->db->free($resql);
 
-            return 1;
+				$this->db->free($resql);
+
+				return 1;
+            } else {
+            	return 0;
+			}
+
         }
         else {
             $this->error = "Error ".$this->db->lasterror();
