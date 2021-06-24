@@ -655,10 +655,9 @@ class Interfacesarbacanetrigger extends DolibarrTriggers
 
 		if($res > 0){
 			return $sarbacane->delete($user);
-		} elseif($res < 0){
-			return -1;
+		} else{
+			return $res;
 		}
 
-		return 0;
 	}
 }
