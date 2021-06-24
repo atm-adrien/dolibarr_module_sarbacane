@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file.
 
 Version 1.1 (2021-06-09)
 =====================
-- FIX Mailing Delete Error Management *2021-06-24* - 1.1.8
+- FIX Mailing Delete Error Management *2021-06-24* - 1.1.9
 - FIX Mise à jour des statistique = Mise à jour du statut du mailing dolibarr *2021-06-23* - 1.1.8
 - FIX Distribution List Compatibility *2021-06-22* - 1.1.7
 - FIX delete sarbacane campaign and stats when mailing is deleting *2021-06-17* - 1.1.6
