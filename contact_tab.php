@@ -134,7 +134,7 @@ $linkback = '<a href="'.DOL_URL_ROOT.'/contact/list.php?restore_lastsearch_value
 $morehtmlref = '<div class="refidno">';
 if (empty($conf->global->SOCIETE_DISABLE_CONTACTS))
 {
-	$objsoc->fetch($object->socid);
+	if(!empty($objsoc)) $objsoc->fetch($object->socid);
 	// Thirdparty
 	$morehtmlref .= $langs->trans('ThirdParty').' : ';
 	if ($objsoc->id > 0) $morehtmlref .= $objsoc->getNomUrl(1, 'contact');
