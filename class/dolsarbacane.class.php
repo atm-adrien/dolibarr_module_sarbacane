@@ -348,10 +348,14 @@ class DolSarbacane extends CommonObject {
                 $this->datec = $this->db->jdate($obj->datec);
                 $this->fk_user_mod = $obj->fk_user_mod;
                 $this->tms = $this->db->jdate($obj->tms);
-            }
-            $this->db->free($resql);
 
-            return 1;
+				$this->db->free($resql);
+
+				return 1;
+            } else {
+            	return 0;
+			}
+
         }
         else {
             $this->error = "Error ".$this->db->lasterror();
@@ -666,8 +670,14 @@ class DolSarbacane extends CommonObject {
         $error = 0;
 
         $this->email_lines = array();
-        $this->email_lines = $this->sarbacane->get('lists/'.$this->sarbacane_listid.'/contacts', array());
-
+        try {
+            $this->email_lines = $this->sarbacane->get('lists/'.$this->sarbacane_listid.'/contacts', array());
+        }
+        catch(Exception $e) {
+            $this->error = $e->getMessage();
+            dol_syslog(get_class($this)."::createSarbacaneCampaign ".$this->error, LOG_ERR);
+            return -1;
+        }
         if(empty($this->email_lines['message'])) {
             $emailsegment = 1;
         }
@@ -676,6 +686,7 @@ class DolSarbacane extends CommonObject {
         }
 
         return $emailsegment;
+
     }
 
     /**
@@ -771,6 +782,8 @@ class DolSarbacane extends CommonObject {
 		if (!empty($TCampaignId))
 		{
 
+			$countnosend = 0;	//on compte le nombre de destinataire pour qui l'envoi du mailing a échoué, si il y en a au moins 1, le statut de la campagne passe en "envoyée partiellement"
+
 			foreach ($TCampaignId as $sarbacaneCampaignId)
 			{
 				try {
@@ -833,15 +846,16 @@ class DolSarbacane extends CommonObject {
 									$this->errors = $this->db->lastqueryerror();
 									$error++;
 								}
+							} else {
+								$countnosend ++;
 							}
 
 						}
 					}
 
 					if($res2 > 0 && !empty($this->CampaignStats)){
-
 						foreach($this->CampaignStats as $campaignStat){
-							$sql="UPDATE ".MAIN_DB_PREFIX."mailing SET date_envoi = '".dol_print_date($campaignStat['date'], '%Y-%m-%d %H:%M:%S')."' WHERE rowid=".((int)$sarbacaneCampaign_fkmailing);
+							$sql="UPDATE ".MAIN_DB_PREFIX."mailing SET date_envoi = '".dol_print_date($campaignStat['date'], '%Y-%m-%d %H:%M:%S')."', statut ='" .((empty($countnosend)) ? '3' : '2'). "'WHERE rowid=".((int)$sarbacaneCampaign_fkmailing);
 							$resql = $this->db->query($sql);
 
 							if(!$resql) {
@@ -1299,17 +1313,26 @@ class DolSarbacane extends CommonObject {
                 return -1;
             }
         }
-        $response = $this->sarbacane->post('lists', array('name' => $namelist));
-        if(empty($response['id'])) {
-            $this->error = $response['message'];
-            $this->errors[] = $this->error;
+        try {
+            $response = $this->sarbacane->post('lists', array('name' => $namelist));
+            if(empty($response['id'])) {
+                $this->error = $response['message'];
+                $this->errors[] = $this->error;
+                return -1;
+            }
+            $listid = $response['id'];
+
+            $response = $this->sarbacane->post('lists/'.$listid.'/fields', array('kind' => 'RADIO', 'caption' => 'Civilité'));
+            $response = $this->sarbacane->post('lists/'.$listid.'/fields', array('kind' => 'STRING', 'caption' => 'Prénom'));
+            $response = $this->sarbacane->post('lists/'.$listid.'/fields', array('kind' => 'STRING', 'caption' => 'Nom'));
+        }
+        catch(Exception $e) {
+            $this->error = $e->getMessage();
+            dol_syslog(get_class($this)."::createSarbacaneCampaign ".$this->error, LOG_ERR);
             return -1;
         }
-        $listid = $response['id'];
 
-        $response = $this->sarbacane->post('lists/'.$listid.'/fields', array('kind' => 'RADIO', 'caption' => 'Civilité'));
-        $response = $this->sarbacane->post('lists/'.$listid.'/fields', array('kind' => 'STRING', 'caption' => 'Prénom'));
-        $response = $this->sarbacane->post('lists/'.$listid.'/fields', array('kind' => 'STRING', 'caption' => 'Nom'));
+
         return $listid;
     }
 
@@ -1571,9 +1594,15 @@ class DolSarbacane extends CommonObject {
 
         if(!empty($conf->global->SARBACANE_EXPORT_EMPTYLIST)) {
 			$this->getInstanceSarbacane();
-
-			$this->sarbacane->post('lists/' . $this->sarbacane_listid . '/empty', '');
-		}
+            try {
+                $this->sarbacane->post('lists/'.$this->sarbacane_listid.'/empty', '');
+            }
+            catch(Exception $e) {
+                $this->error = $e->getMessage();
+                dol_syslog(get_class($this)."::exportDesttoSarbacane ".$this->error, LOG_ERR);
+                return -1;
+            }
+        }
 
 
         if(count($this->email_lines)) {
