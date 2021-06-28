@@ -92,7 +92,8 @@ if(!empty($createList) && !empty($nameList)){
     $newList = $res;
 	if ($res < 0)
     {
-        setEventMessage($langs->trans('SarbacaneReturnError', $sarbacane->error), 'errors');
+//        setEventMessage($langs->trans('SarbacaneReturnError', $sarbacane->error), 'errors');
+        setEventMessage($langs->trans('ListAlreadyExistInSarbacane'), 'errors');
     } else {
 	    setEventMessage($langs->trans('SarbacaneListCreated'));
     }
