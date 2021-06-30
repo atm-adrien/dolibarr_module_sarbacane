@@ -153,6 +153,7 @@ $sql.= " FROM ".MAIN_DB_PREFIX.DolSarbacane::$campaign_contact_table." as scc";
 $sql.= " JOIN ".MAIN_DB_PREFIX."sarbacane as s ON s.sarbacane_id = scc.sarbacane_campaignid";
 $sql.= " JOIN ".MAIN_DB_PREFIX."mailing m ON m.rowid = s.fk_mailing";
 $sql.= " WHERE scc.fk_contact = ".$id;
+$sql.= " AND m.statut IN(2,3)";
 // Todo ajouter les filtres
 
 if (isset($search_campaign) && !empty($search_campaign)) $sql.= " AND m.titre LIKE '%".$db->escape($search_campaign)."%'";
