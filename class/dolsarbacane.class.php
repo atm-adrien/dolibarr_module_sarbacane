@@ -782,7 +782,7 @@ class DolSarbacane extends CommonObject {
 		if (!empty($TCampaignId))
 		{
 
-			$countnosend = 0;	//on compte le nombre de destinataire pour qui l'envoi du mailing a échoué, si il y en a au moins 1, le statut de la campagne passe en "envoyée partiellement"
+			$countnosend = false;	//on compte le nombre de destinataire pour qui l'envoi du mailing a échoué, si il y en a au moins 1, le statut de la campagne passe en "envoyée partiellement"
 
 			foreach ($TCampaignId as $sarbacaneCampaignId)
 			{
@@ -847,22 +847,41 @@ class DolSarbacane extends CommonObject {
 									$error++;
 								}
 							} else {
-								$countnosend ++;
+								$countnosend = true;
 							}
 
 						}
+
 					}
 
 					if($res2 > 0 && !empty($this->CampaignStats)){
-						foreach($this->CampaignStats as $campaignStat){
-							$sql="UPDATE ".MAIN_DB_PREFIX."mailing SET date_envoi = '".dol_print_date($campaignStat['date'], '%Y-%m-%d %H:%M:%S')."', statut ='" .((empty($countnosend)) ? '3' : '2'). "'WHERE rowid=".((int)$sarbacaneCampaign_fkmailing);
+
+						//on vérifie que le nombre de destinataires du mailing est bien égal au nombre de destinataires de la campagne Sarbacane
+						//si ce n'est pas le cas, cela veut dire qu'il y a eu un NPAI et on ne peut donc pas considérer la campagne comme envoyée complètement
+
+						$sql = "SELECT COUNT(rowid) as nbDest FROM " . MAIN_DB_PREFIX . "mailing_cibles WHERE fk_mailing =" . ((int)$sarbacaneCampaign_fkmailing);
+						$resql = $this->db->query($sql);
+
+						if($resql) {
+							$obj = $this->db->fetch_object($resql);
+
+							if ($obj->nbDest > count($this->CampaignRecipientStats)) {
+								$countnosend = true;
+							}
+						} else {
+							$this->errors = $this->db->lastqueryerror();
+							$error++;
+						}
+
+						foreach ($this->CampaignStats as $campaignStat) {
+
+							$sql = "UPDATE " . MAIN_DB_PREFIX . "mailing SET date_envoi = '" . dol_print_date($campaignStat['date'], '%Y-%m-%d %H:%M:%S') . "', statut ='" . ((empty($countnosend)) ? '3' : '2') . "'WHERE rowid=" . ((int)$sarbacaneCampaign_fkmailing);
 							$resql = $this->db->query($sql);
 
-							if(!$resql) {
+							if (!$resql) {
 								$this->errors = $this->db->lastqueryerror();
 								$error++;
 							}
-
 						}
 					}
 
