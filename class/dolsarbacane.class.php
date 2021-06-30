@@ -830,7 +830,6 @@ class DolSarbacane extends CommonObject {
 										//si npai alors màj statut du destinataire au statut "non envoyé"
 										$sql = "UPDATE " . MAIN_DB_PREFIX . "mailing_cibles SET statut = 0 WHERE email ='" . $campaignStat['recipient']['email'] . "' AND fk_mailing =" . ((int)$sarbacaneCampaign_fkmailing);
 										$this->db->query($sql);
-										$nosendcomplet = true;
 
 										$campaignContact->fetch_contact($campaignContact->fk_contact);
 										if ($campaignContact->npai == $campaignContact->contact->email)
@@ -842,7 +841,7 @@ class DolSarbacane extends CommonObject {
 								}
 							}
 
-							//si success alors màj du statut "envoyé"
+							//si success alors màj du statut "envoyé" sinon on note que la campagne n'a pas été envoyé complètement
 							if ($campaignStat['success'] == true) {
 								$sql = "UPDATE " . MAIN_DB_PREFIX . "mailing_cibles SET statut = 1 WHERE email ='" . $campaignStat['recipient']['email'] . "' AND fk_mailing =" . ((int)$sarbacaneCampaign_fkmailing);
 								$this->db->query($sql);
@@ -854,7 +853,6 @@ class DolSarbacane extends CommonObject {
 							} else {
 								$nosendcomplet = true;
 							}
-
 						}
 					}
 
