@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 
 Version 1.1 (2021-06-09)
 =====================
+- FIX blacklist select : ajout d'une valeur empty *2021-06-30* - 1.1.13
 - FIX contact_tab.php : on n'affiche que les campagnes au statut "envoyé " et "envoyé partiellement" *2021-06-25* - 1.1.12
 - FIX contact_tab.php fatal error *2021-06-25* - 1.1.11
 - FIX missing try catch *2021-06-24* - 1.1.10
