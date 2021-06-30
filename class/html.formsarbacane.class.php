@@ -141,7 +141,6 @@ class FormSarbacane
 			$selected = 'DEFAULT_BLACKLIST';
 			$disabled = 'disabled';
 		}
-		if (empty($selected)) $selected = 'DEFAULT_BLACKLIST';
 
 		$out .= '<select class="flat" name="'.$htmlname.'" id="'.$htmlname.'" '.$disabled.'>';
 
@@ -154,7 +153,8 @@ class FormSarbacane
 			}
 		}
 
-		$out .= '<option value="DEFAULT_BLACKLIST" selected="selected">'.$langs->trans('SarbacaneDefaultBlacklist').'</option>';
+		if($selected == 'DEFAULT_BLACKLIST') $out .= '<option value="DEFAULT_BLACKLIST" selected="selected">'.$langs->trans('SarbacaneDefaultBlacklist').'</option>';
+		else $out .= '<option value="DEFAULT_BLACKLIST">'.$langs->trans('SarbacaneDefaultBlacklist').'</option>';
 
 		if(is_array($sarbacane->blacklists_lines) && count($sarbacane->blacklists_lines) > 0) {
 			foreach($sarbacane->blacklists_lines as $line) {
