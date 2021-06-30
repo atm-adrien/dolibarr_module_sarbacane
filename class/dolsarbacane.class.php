@@ -782,7 +782,7 @@ class DolSarbacane extends CommonObject {
 		if (!empty($TCampaignId))
 		{
 
-			$countnosend = false;	//on compte le nombre de destinataire pour qui l'envoi du mailing a échoué, si il y en a au moins 1, le statut de la campagne passe en "envoyée partiellement"
+			$nosendcomplet = false;	//on compte le nombre de destinataire pour qui l'envoi du mailing a échoué, si il y en a au moins 1, le statut de la campagne passe en "envoyée partiellement"
 
 			foreach ($TCampaignId as $sarbacaneCampaignId)
 			{
@@ -827,6 +827,11 @@ class DolSarbacane extends CommonObject {
 								{
 									if (!empty($campaignContact->npai))
 									{
+										//si npai alors màj statut du destinataire au statut "non envoyé"
+										$sql = "UPDATE " . MAIN_DB_PREFIX . "mailing_cibles SET statut = 0 WHERE email ='" . $campaignStat['recipient']['email'] . "' AND fk_mailing =" . ((int)$sarbacaneCampaign_fkmailing);
+										$this->db->query($sql);
+										$nosendcomplet = true;
+
 										$campaignContact->fetch_contact($campaignContact->fk_contact);
 										if ($campaignContact->npai == $campaignContact->contact->email)
 										{
@@ -837,9 +842,9 @@ class DolSarbacane extends CommonObject {
 								}
 							}
 
+							//si success alors màj du statut "envoyé"
 							if ($campaignStat['success'] == true) {
 								$sql = "UPDATE " . MAIN_DB_PREFIX . "mailing_cibles SET statut = 1 WHERE email ='" . $campaignStat['recipient']['email'] . "' AND fk_mailing =" . ((int)$sarbacaneCampaign_fkmailing);
-
 								$this->db->query($sql);
 
 								if (!$resql) {
@@ -847,18 +852,16 @@ class DolSarbacane extends CommonObject {
 									$error++;
 								}
 							} else {
-								$countnosend = true;
+								$nosendcomplet = true;
 							}
 
 						}
-
 					}
 
 					if($res2 > 0 && !empty($this->CampaignStats)){
 
 						//on vérifie que le nombre de destinataires du mailing est bien égal au nombre de destinataires de la campagne Sarbacane
-						//si ce n'est pas le cas, cela veut dire qu'il y a eu un NPAI et on ne peut donc pas considérer la campagne comme envoyée complètement
-
+						//si ce n'est pas le cas, cela veut dire qu'une ou plusieurs adresses mails ont été exclues de l'envoie sur sarbacane (npai identifiée) et on ne peut donc pas considérer la campagne comme envoyée complètement
 						$sql = "SELECT COUNT(rowid) as nbDest FROM " . MAIN_DB_PREFIX . "mailing_cibles WHERE fk_mailing =" . ((int)$sarbacaneCampaign_fkmailing);
 						$resql = $this->db->query($sql);
 
@@ -866,16 +869,17 @@ class DolSarbacane extends CommonObject {
 							$obj = $this->db->fetch_object($resql);
 
 							if ($obj->nbDest > count($this->CampaignRecipientStats)) {
-								$countnosend = true;
+								$nosendcomplet = true;
 							}
 						} else {
 							$this->errors = $this->db->lastqueryerror();
 							$error++;
 						}
 
+						//màj du statut de la campagne : si $nosendcomplet est à true, c'est envoyé partiellement
 						foreach ($this->CampaignStats as $campaignStat) {
 
-							$sql = "UPDATE " . MAIN_DB_PREFIX . "mailing SET date_envoi = '" . dol_print_date($campaignStat['date'], '%Y-%m-%d %H:%M:%S') . "', statut ='" . ((empty($countnosend)) ? '3' : '2') . "'WHERE rowid=" . ((int)$sarbacaneCampaign_fkmailing);
+							$sql = "UPDATE " . MAIN_DB_PREFIX . "mailing SET date_envoi = '" . dol_print_date($campaignStat['date'], '%Y-%m-%d %H:%M:%S') . "', statut ='" . (($nosendcomplet == false) ? '3' : '2') . "'WHERE rowid=" . ((int)$sarbacaneCampaign_fkmailing);
 							$resql = $this->db->query($sql);
 
 							if (!$resql) {
