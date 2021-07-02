@@ -808,10 +808,20 @@ class DolSarbacane extends CommonObject {
 							$ret = $campaignContact->fetchBySarbacaneContactCampaignId($campaignStat['recipient']['fields']['CONTACT_ID']);
 							if ($ret > 0)
 							{
+								$TNPAIContacts = $this->getNPAIContact();
 								$campaignContact->nb_open = $campaignStat['opens'];
 								$campaignContact->nb_click = $campaignStat['clicks'];
 								$campaignContact->unsubscribe = $campaignStat['unsubscribe'];
-								if ($campaignStat['bounce'] == true) $campaignContact->npai = $campaignStat['recipient']['email'];
+								//si l'adresse mail est dans la liste des adresses NPAI, on annulé le success renvoyé par sarbacane (hack de la mort qui tue) et on note l'adresse en npai de la target de la campagne
+								if(!empty($TNPAIContacts)){
+									foreach ($TNPAIContacts as $bounce){
+										if($bounce['email'] == $campaignStat['recipient']['email']){
+											$campaignContact->npai = $campaignStat['recipient']['email'];
+											$campaignStat['success'] = false;
+											break;
+										}
+									}
+								}
 								if ($campaignStat['unsubscribe'] == true)
 								{
 									$campaignContact->unsubscribed_email = $campaignStat['recipient']['email'];
@@ -827,8 +837,8 @@ class DolSarbacane extends CommonObject {
 								{
 									if (!empty($campaignContact->npai))
 									{
-										//si npai alors màj statut du destinataire au statut "non envoyé"
-										$sql = "UPDATE " . MAIN_DB_PREFIX . "mailing_cibles SET statut = 0 WHERE email ='" . $campaignStat['recipient']['email'] . "' AND fk_mailing =" . ((int)$sarbacaneCampaign_fkmailing);
+										//si npai alors màj statut du destinataire au statut "error"
+										$sql = "UPDATE " . MAIN_DB_PREFIX . "mailing_cibles SET statut = '-1' WHERE email ='" . $campaignStat['recipient']['email'] . "' AND fk_mailing =" . ((int)$sarbacaneCampaign_fkmailing);
 										$this->db->query($sql);
 
 										if ($campaignContact->npai == $campaignContact->contact->email)
