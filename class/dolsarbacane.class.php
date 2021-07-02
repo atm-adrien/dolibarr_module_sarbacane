@@ -1815,7 +1815,7 @@ class DolSarbacane extends CommonObject {
 	/**
 	 * Return blacklisted contact of blacklisted list of $this
 	 *
-	 * @return array if OK , -1 if KO
+	 * @return array|int  if OK , -1 if KO
 	 */
     public function getBlacklistedContact(){
 
@@ -1858,7 +1858,7 @@ class DolSarbacane extends CommonObject {
 	/**
 	 * Return bounces contact of bounce list of sarbacane
 	 *
-	 * @return array if OK , -1 if KO
+	 * @return array|int if OK , -1 if KO
 	 */
 	public function getNPAIContact(){
 
