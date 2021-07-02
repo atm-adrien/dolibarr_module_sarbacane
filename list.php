@@ -146,7 +146,7 @@ if (empty($reshook))
  * View
  */
 
-llxHeader('', $langs->trans("SarbacaneDestList"), 'EN:Module_EMailing|FR:Module_Mailing|ES:M&oacute;dulo_Mailing');
+llxHeader('', $langs->trans("SarbacaneList"), 'EN:Module_EMailing|FR:Module_Mailing|ES:M&oacute;dulo_Mailing');
 
 $form = new Form($db);
 
@@ -197,7 +197,7 @@ if ($resql)
 {
 	$num = $db->num_rows($resql);
 
-	$title = $langs->trans("SarbacaneDestList");
+	$title = $langs->trans("SarbacaneList");
 	if ($filteremail) $title .= ' ('.$langs->trans("SentTo", $filteremail).')';
 
 	$newcardbutton = '';

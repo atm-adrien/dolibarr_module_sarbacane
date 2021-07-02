@@ -283,7 +283,7 @@ class modsarbacane extends DolibarrModules
 		$this->menu[$r] = array(
 				'fk_menu' => 'fk_mainmenu=sarbacane,fk_leftmenu=SarbacaneMenu',
 				'type' => 'left',
-				'titre' => 'SarbacaneDestList',
+				'titre' => 'SarbacaneList',
 				'url' => '/sarbacane/list.php',
 				'langs' => 'sarbacane@sarbacane',
 				'position' => 101,
