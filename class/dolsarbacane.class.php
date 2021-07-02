@@ -831,7 +831,6 @@ class DolSarbacane extends CommonObject {
 										$sql = "UPDATE " . MAIN_DB_PREFIX . "mailing_cibles SET statut = 0 WHERE email ='" . $campaignStat['recipient']['email'] . "' AND fk_mailing =" . ((int)$sarbacaneCampaign_fkmailing);
 										$this->db->query($sql);
 
-										$campaignContact->fetch_contact($campaignContact->fk_contact);
 										if ($campaignContact->npai == $campaignContact->contact->email)
 										{
 											$campaignContact->contact->array_options['options_sarb_npai'] = true;
@@ -1811,6 +1810,87 @@ class DolSarbacane extends CommonObject {
 //        var_dump($ret);
 //        exit;
     }
+
+
+	/**
+	 * Return blacklisted contact of blacklisted list of $this
+	 *
+	 * @return array if OK , -1 if KO
+	 */
+    public function getBlacklistedContact(){
+
+    	$this->getInstanceSarbacane();
+		$error = 0;
+		$TBlacklistedContact = array();
+
+		$offset = 0;
+
+		if(!empty($this->sarbacane_blacklistid)) {
+
+			while (1) {
+				try {
+					$response = $this->sarbacane->get('/blacklists/' . $this->sarbacane_blacklistid . '/unsubscribers?offset='.$offset.'&limit=1000', array());
+					$TBlacklistedContact = array_merge($TBlacklistedContact, $response);
+
+					if (count($response) < 1000) {
+						break;
+					} else {
+						$offset += 1000;
+						continue;
+					}
+				} catch (Exception $e) {
+					$this->errors[] = $e->getMessage($this->sarbacane_blacklistid);
+					$error++;
+					break;
+				}
+
+
+			}
+		}
+
+
+		if (empty($error)) return $TBlacklistedContact;
+		else return -1;
+
+
+	}
+
+	/**
+	 * Return bounces contact of bounce list of sarbacane
+	 *
+	 * @return array if OK , -1 if KO
+	 */
+	public function getNPAIContact(){
+
+		$this->getInstanceSarbacane();
+		$error = 0;
+		$TBounces = array();
+
+		$offset = 0;
+
+		while (1) {
+			try {
+				$response = $this->sarbacane->get('/blacklists/DEFAULT_BOUNCELIST/bounces?offset='.$offset.'&limit=1000', array());
+
+				$TBounces = array_merge($TBounces, $response);
+
+				if (count($response) < 1000) {
+					break;
+				} else {
+					$offset += 1000;
+					continue;
+				}
+			} catch (Exception $e) {
+				$this->errors[] = $e->getMessage($this->sarbacane_blacklistid);
+				$error++;
+				break;
+			}
+
+		}
+
+		if (empty($error)) return $TBounces;
+		else return -1;
+	}
 
 }
 
