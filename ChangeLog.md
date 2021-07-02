@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 
 Version 1.1 (2021-06-09)
 =====================
+- FIX Trad "SarbacaneDestList" au lieu de "SarbacaneList"  *2021-07-02* - 1.1.17
 - Statut "Erreur" contacts NPAI lors de la màj des stats *2021-07-02* - 1.1.16
 - Ajout fonctions : getNPAIContact() && getBlacklistedContact() *2021-07-02* - 1.1.15
 - FIX blacklist select : ajout d'une valeur empty *2021-06-30* - 1.1.14
