@@ -808,14 +808,14 @@ class DolSarbacane extends CommonObject {
 							$ret = $campaignContact->fetchBySarbacaneContactCampaignId($campaignStat['recipient']['fields']['CONTACT_ID']);
 							if ($ret > 0)
 							{
-								$TNPAIContacts = $this->getNPAIContact();
+								$TNPAIContacts = $this->getNPAIContactEmail();
 								$campaignContact->nb_open = $campaignStat['opens'];
 								$campaignContact->nb_click = $campaignStat['clicks'];
 								$campaignContact->unsubscribe = $campaignStat['unsubscribe'];
 								//si l'adresse mail est dans la liste des adresses NPAI, on annulé le success renvoyé par sarbacane (hack de la mort qui tue) et on note l'adresse en npai de la target de la campagne
 								if(!empty($TNPAIContacts)){
 									foreach ($TNPAIContacts as $bounce){
-										if($bounce['email'] == $campaignStat['recipient']['email']){
+										if($bounce == $campaignStat['recipient']['email']){
 											$campaignContact->npai = $campaignStat['recipient']['email'];
 											$campaignStat['success'] = false;
 											break;
@@ -1866,42 +1866,77 @@ class DolSarbacane extends CommonObject {
 	}
 
 	/**
-	 * Return bounces contact of bounce list of sarbacane
+	 * Return bounces contact email of bounce list of sarbacane
+	 *
+	 * @param string $list 'sarbacane' for list of sarbacane, 'dolibarr' for list of contacts with extrafield sarb_npai to 1, 'all' for both
 	 *
 	 * @return array|int if OK , -1 if KO
 	 */
-	public function getNPAIContact(){
+	public function getNPAIContactEmail($list = 'sarbacane'){
 
 		$this->getInstanceSarbacane();
 		$error = 0;
 		$TBounces = array();
+		$TBouncesDol = array();
+		$TBouncesSarb = array();
 
 		$offset = 0;
 
-		while (1) {
-			try {
-				$response = $this->sarbacane->get('/blacklists/DEFAULT_BOUNCELIST/bounces?offset='.$offset.'&limit=1000', array());
+		if($list == 'sarbacane' || $list == 'all') {
 
-				$TBounces = array_merge($TBounces, $response);
+			while (1) {
+				try {
+					$response = $this->sarbacane->get('/blacklists/DEFAULT_BOUNCELIST/bounces?offset=' . $offset . '&limit=1000', array());
 
-				if (count($response) < 1000) {
+					foreach ($response as $npai_contact) {
+						$TBouncesSarb[] = $npai_contact['email'];
+					}
+
+					if (count($response) < 1000) {
+						break;
+					} else {
+						$offset += 1000;
+						continue;
+					}
+				} catch (Exception $e) {
+					$this->errors[] = $e->getMessage($this->sarbacane_blacklistid);
+					$error++;
 					break;
-				} else {
-					$offset += 1000;
-					continue;
 				}
-			} catch (Exception $e) {
-				$this->errors[] = $e->getMessage($this->sarbacane_blacklistid);
-				$error++;
-				break;
+
 			}
 
+			$TBounces = $TBouncesSarb;
+
+		}
+
+		if($list = 'dolibarr' || $list == 'all'){
+
+			$sql = "SELECT email FROM ".MAIN_DB_PREFIX."socpeople s";
+			$sql .= " JOIN ".MAIN_DB_PREFIX."socpeople_extrafields se ON se.fk_object = s.rowid";
+			$sql .= " WHERE sarb_npai = 1";
+
+			$resql = $this->db->query($sql);
+
+			if($resql){
+				while($obj = $this->db->fetch_object($resql)){
+					if(!in_array($obj->email, $TBouncesSarb)) $TBouncesDol[] = $obj->email;
+				}
+			} else {
+				$error ++;
+			}
+
+			$TBounces = $TBouncesDol;
+
+		}
+
+		if($list == 'all'){
+			$TBounces = array_merge($TBouncesDol, $TBouncesSarb);
 		}
 
 		if (empty($error)) return $TBounces;
 		else return -1;
 	}
-
 }
 
 class DolSarbacaneeMailLine {
