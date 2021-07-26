@@ -214,10 +214,15 @@ if ($action=='associateconfirm') {
 $error_sarbacane_control = 0;
 $email_in_dol_not_in_sarbacane=array();
 //Listid must be define
-$error_list_define=false;
+$error_list_define=$error_blacklist_define=false;
 if (empty($sarbacane->sarbacane_listid)) {
 	$error_list_define=true;
 	$error_sarbacane_control++;
+}
+
+if (empty($sarbacane->sarbacane_blacklistid)) {
+        $error_blacklist_define=true;
+        $error_sarbacane_control++;
 }
 
 $error_sendername=false;
@@ -547,6 +552,9 @@ if ( !empty($conf->global->SARBACANE_API_KEY)) {
     if($error_sendername) {
         dol_htmloutput_mesg($langs->trans("SarbacaneSenderNameMandatory"), '', 'error', 1);
     }
+	if($error_blacklist_define) {
+		dol_htmloutput_mesg($langs->trans("SarbacaneBlacklistMandatory"), '', 'warning', 1);
+	}
 	if ($object->statut == 0) {
 		if ((float) DOL_VERSION < 3.7) dol_htmloutput_mesg($langs->trans("SarbacaneNotValidated").' : <a href="'.dol_buildpath('/comm/mailing/fiche.php',1).'?id='.$object->id.'">'.$langs->trans('Mailing').'</a>','','warning',1);
 		else  dol_htmloutput_mesg($langs->trans("SarbacaneNotValidated").' : <a href="'.dol_buildpath('/comm/mailing/card.php',1).'?id='.$object->id.'">'.$langs->trans('Mailing').'</a>','','warning',1);

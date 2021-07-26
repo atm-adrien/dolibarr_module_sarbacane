@@ -77,6 +77,7 @@ SarbacaneCannotSendControlNotOK= Les conditions de création d'une campagne ne s
 SarbacaneCreateCampaign=Créer la campagne Sarbacane
 SarbacaneSenderName=Nom de l'expéditeur
 SarbacaneSenderNameMandatory=le nom de l'expéditeur est obligatoire
+SarbacaneBlacklistMandatory=La liste de désinscription doit obligatoirement être renseignée
 SarbacaneStatus=Statut de la campagne Sarbacane
 SarbacaneSendMailing=Envoi de la campagne Sarbacane
 SarbacaneNotActive=Le module est actif mais la configuration n'est pas complète

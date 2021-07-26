@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 
 Version 1.1 (2021-06-09)
 =====================
+- FIX : La liste de désinscription liée à la campagne n'est plus systématiquement renseignée avec la liste par défaut mais doit forcément être renseignée manuellement pour pouvoir créer la campagne Sarbacane *26/07/2021* - 1.1.19
 - FIX Changement nom fonction "getNPAIContact" en "getNPAIContactEmail" + cette fonction peut désormais retourner la liste des contacts dolibarr ayant l'extrafield "sarb_npai" coché *2021-07-13* - 1.1.18
 - FIX Trad "SarbacaneDestList" au lieu de "SarbacaneList"  *2021-07-02* - 1.1.17
 - Statut "Erreur" contacts NPAI lors de la màj des stats *2021-07-02* - 1.1.16
