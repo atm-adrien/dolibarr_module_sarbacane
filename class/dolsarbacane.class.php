@@ -988,7 +988,7 @@ class DolSarbacane extends CommonObject {
 
             if(! empty($tmp_array[0]) && isValidEmail($tmp_array[0]) && ! in_array($tmp_array[0], $email_added)) {
 
-            	if ($tmp_array[1] == 'contact' || $tmp_array[1] == 'DistributionList') {
+            	if ($tmp_array[1] == 'contact' || strtolower($tmp_array[1]) == strtolower('DistributionList')) {
             		$contactstatic = new Contact($this->db);
             		$result = $contactstatic->fetch($tmp_array[3]);
 
@@ -1050,12 +1050,13 @@ class DolSarbacane extends CommonObject {
             // Call
 
             if(! empty($email)) {
-                try {
-                    $data = array(
+
+				try {
+					$data = array(
                         "email" => $email['email_address'],
                         "phone" => ""
                     );
-                    if($email['tmp_array'][1] == 'contact' || $email['tmp_array'][1] == 'DistributionList' || $email['tmp_array'][1] == 'file') {
+                    if($email['tmp_array'][1] == 'contact' || strtolower($email['tmp_array'][1]) == strtolower('DistributionList') || $email['tmp_array'][1] == 'file') {
                         $found = 0;
 
                         $civ_id = 'CIVILITY_ID';
@@ -1063,7 +1064,6 @@ class DolSarbacane extends CommonObject {
                         $firstname_id = 'FIRSTNAME_ID';
 
                         $TSarbacaneFields = $this->sarbacane->get('lists/'.$listid.'/fields', array());
-
                         if(! empty($TSarbacaneFields)) {
                             foreach($TSarbacaneFields['fields'] as $field) {
                                 if($field['caption'] == 'Civilité') $civ_id = $field['id'];
@@ -1148,7 +1148,6 @@ class DolSarbacane extends CommonObject {
 
         $sql = ' INSERT INTO '.MAIN_DB_PREFIX.$this::$list_contact_table.' (fk_contact, sarbacane_listid, sarbacane_contactlistid, fk_user_author, datec, fk_user_mod)
                 VALUES ('.$contactid.', "'.$listid.'","'.$sarbacane_contactid.'",'.$user->id.',NOW(),'.$user->id.');';
-
         $this->db->begin();
 
         dol_syslog(get_class($this)."::create sql=".$sql, LOG_DEBUG);
@@ -1238,11 +1237,9 @@ class DolSarbacane extends CommonObject {
                 //Liaison campagne contact id & contact dolibarr
                 $TRecipient = $this->sarbacane->get('/campaigns/'.$this->sarbacane_id.'/recipients', array());
                 $this->getEmailMailingDolibarr('toadd');
-
                 if(!empty($TRecipient)) {
                     foreach($TRecipient as $recipient) {
                         $fk_contact = $this->getContactDolibarrIdByMail($recipient['email']);
-
                         if(!empty($fk_contact))
 						{
 							$this->upsertCampaignContact($recipient['id'], $fk_contact);
@@ -1276,7 +1273,7 @@ class DolSarbacane extends CommonObject {
         	foreach($this->email_lines as $email_line) {
                 $tmp_array = explode('&', $email_line);
                 if($tmp_array[0] == $email && $tmp_array[1] == 'contact') return $tmp_array[2];
-                if($tmp_array[0] == $email && $tmp_array[1] == 'DistributionList') return $tmp_array[3];
+                if($tmp_array[0] == $email && strtolower($tmp_array[1]) == strtolower('DistributionList')) return $tmp_array[3];
             }
         }
 
@@ -2069,7 +2066,6 @@ class DolSarbacaneTargetLine extends DolSarbacane {
 		$sql = "SELECT rowid, fk_contact, sarbacane_campaignid, sarbacane_contactcampaignid, fk_user_author, datec, fk_user_mod, tms, statut, nb_click, nb_open, npai, unsubscribe, unsubscribed_email, used_blacklist";
 		$sql.= " FROM ".MAIN_DB_PREFIX.$this->table_element;
 		$sql.= " WHERE sarbacane_contactcampaignid = '".$sarbacane_contactcampaignid."'";
-
 		$resql = $this->db->query($sql);
 
 		if ($resql)
