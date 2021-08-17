@@ -708,7 +708,6 @@ class DolSarbacane extends CommonObject {
 
 					$campaignRecipientStats = $this->sarbacane->get('reports/' . $campaignId . '/recipients?offset=' . $offset, array());
 					$this->CampaignRecipientStats = array_merge($this->CampaignRecipientStats, $campaignRecipientStats);
-
 					if (count($campaignRecipientStats) < 1000) {
 						break;
 					} else {
@@ -788,12 +787,13 @@ class DolSarbacane extends CommonObject {
 				try {
 
 					//on récupère le mailing associé à la campagne sarbacane
-					$sql = "SELECT fk_mailing FROM ".MAIN_DB_PREFIX.$this->table_element." WHERE sarbacane_id = '".$sarbacaneCampaignId."'";
+					$sql = "SELECT fk_mailing, sarbacane_blacklistid FROM ".MAIN_DB_PREFIX.$this->table_element." WHERE sarbacane_id = '".$sarbacaneCampaignId."'";
 					$resql = $this->db->query($sql);
 
 					if($resql){
 						$obj = $this->db->fetch_object($resql);
 						$sarbacaneCampaign_fkmailing = $obj->fk_mailing;
+						$this->sarbacane_blacklistid = $obj->sarbacane_blacklistid;
 					}
 
 					$res = $this->getCampaignRecipientStat($sarbacaneCampaignId);
