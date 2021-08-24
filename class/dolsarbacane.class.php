@@ -801,12 +801,15 @@ class DolSarbacane extends CommonObject {
 
 					if ($res > 0  && !empty($this->CampaignRecipientStats))
 					{
+
 						foreach ($this->CampaignRecipientStats as $campaignStat)
 						{
 							$campaignContact = new DolSarbacaneTargetLine($this->db);
 							$ret = $campaignContact->fetchBySarbacaneContactCampaignId($campaignStat['recipient']['fields']['CONTACT_ID']);
 							if ($ret > 0)
 							{
+
+
 								$TNPAIContacts = $this->getNPAIContactEmail();
 								$campaignContact->nb_open = $campaignStat['opens'];
 								$campaignContact->nb_click = $campaignStat['clicks'];
@@ -824,10 +827,11 @@ class DolSarbacane extends CommonObject {
 								if ($campaignStat['unsubscribe'] == true)
 								{
 									$campaignContact->unsubscribed_email = $campaignStat['recipient']['email'];
-									$campaignContact->used_blacklist = $this->sarbacane_blacklistid;
-									if (empty($campaignContact->used_blacklist)){
-										$campaignContact->used_blacklist = 'DEFAULT_BLACKLIST';
-									}
+
+								}
+								$campaignContact->used_blacklist = $this->sarbacane_blacklistid;
+								if (empty($campaignContact->used_blacklist)){
+									$campaignContact->used_blacklist = 'DEFAULT_BLACKLIST';
 								}
 								$campaignContact->statut = ($campaignContact->nb_open > 0 && empty($campaignContact->unsubscribe)) ? 1 : 0;
 
