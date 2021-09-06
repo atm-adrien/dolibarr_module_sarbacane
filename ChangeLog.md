@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 
 Version 1.1 (2021-06-09)
 =====================
+- FIX : Mise à jour des stats : toujours renseigner "used_blacklist" *24/08/2021* - 1.1.22
 - FIX : Récupération de l'ID de la blacklist de la campagne *17/08/2021* - 1.1.21
 - FIX : Lorsque l'on ajoute des destinataires à une campagne Sarbacane via une liste de diffusion Dolibarr, les destinataires n'étaient pas inscrits en BDD *16/08/2021* - 1.1.20
 - FIX : La liste de désinscription liée à la campagne n'est plus systématiquement renseignée avec la liste par défaut mais doit forcément être renseignée manuellement pour pouvoir créer la campagne Sarbacane *26/07/2021* - 1.1.19
