@@ -914,7 +914,21 @@ class DolSarbacane extends CommonObject {
 	 */
 	public function CRONupdateCampaignRecipientStats()
 	{
-		$ret = $this->updateCampaignRecipientStats();
+		$a = microtime(true);
+
+		$this->output = '';
+		try {
+			$ret = $this->updateCampaignRecipientStats();
+		}
+		catch(Exception $e) {
+			//dol_syslog();
+			$this->output .= '...';
+			return 1;	// Error
+		}
+
+		$b = microtime(true);
+		$this->output .= 'Execution time: '.($b-$a);
+
 		if ($ret > 0) return 0;
 		else return 1;
 	}
