@@ -922,7 +922,7 @@ class DolSarbacane extends CommonObject {
 		}
 		catch(Exception $e) {
 			//dol_syslog();
-			$this->output .= '...';
+			$this->output .= 'CRON exécution has stopped because of an error';
 			return 1;	// Error
 		}
 
