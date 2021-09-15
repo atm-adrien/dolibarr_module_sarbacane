@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 
 Version 1.1 (2021-06-09)
 =====================
+- FIX : Ajout de paramètres (offset et limit) dans l'appel API destiné à lister tous les contacts d'une liste de contacts *15/09/2021* - 1.1.24
 - FIX : Mise à jour des stats : toujours renseigner "used_blacklist" *24/08/2021* - 1.1.23
 - FIX : Ajout d'output lors de lexecution du CRON (en cas d'erreur / en cas de succès pour l'execution time) *31/08/2021* - 1.1.22
 - FIX : Récupération de l'ID de la blacklist de la campagne *17/08/2021* - 1.1.21
