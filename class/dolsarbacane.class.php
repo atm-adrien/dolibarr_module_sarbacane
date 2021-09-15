@@ -668,15 +668,27 @@ class DolSarbacane extends CommonObject {
         $this->getInstanceSarbacane();
         $error = 0;
 
+		$offset =0;
         $this->email_lines = array();
-        try {
-            $this->email_lines = $this->sarbacane->get('lists/'.$this->sarbacane_listid.'/contacts', array());
-        }
-        catch(Exception $e) {
-            $this->error = $e->getMessage();
-            dol_syslog(get_class($this)."::createSarbacaneCampaign ".$this->error, LOG_ERR);
-            return -1;
-        }
+		while (1) {
+			try {
+				$email_lines = $this->sarbacane->get('lists/'.$this->sarbacane_listid.'/contacts?offset=' . $offset .'&limit=1000', array());
+				$this->email_lines = array_merge($this->email_lines, $email_lines);
+				if (count($email_lines) < 1000) {
+					break;
+				} else {
+					$offset += 1000;
+					continue;
+				}
+			}
+			catch(Exception $e) {
+				$this->error = $e->getMessage();
+				dol_syslog(get_class($this)."::createSarbacaneCampaign ".$this->error, LOG_ERR);
+				return -1;
+			}
+		}
+
+
         if(empty($this->email_lines['message'])) {
             $emailsegment = 1;
         }
